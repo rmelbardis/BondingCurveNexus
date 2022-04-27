@@ -17,3 +17,4 @@ requests
 
 # utils
 ipython
+etherscan-python
