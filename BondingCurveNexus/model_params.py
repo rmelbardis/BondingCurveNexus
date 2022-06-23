@@ -1,6 +1,6 @@
-#--------------------------------------------------#
-# Define fixed modelling parameters for simulation #
-#--------------------------------------------------#
+'''
+Define fixed modelling parameters for simulation
+'''
 
 # number of days to run the model for
 model_days = 366

@@ -1,7 +1,6 @@
-#-------------------------------------------------------------#
-# Define opening & fixed system parameters for simulation #
-#-------------------------------------------------------------#
-
+'''
+Define opening & fixed system parameters for simulation
+'''
 import requests
 
 # NEXUSTRACKER VALUES TODAY - UPDATES REQUIRED REGULARLY #
@@ -18,12 +17,15 @@ params = {
         }
 wnxm_price_now = requests.get(url, params=params).json()['wrapped-nxm']['eth']
 
-# SYSTEM PARAMETERS - CURRENT FIXED BUT MAY BE SUBJECT TO CHANGE #
+# SYSTEM PARAMETERS - CURRENTLY FIXED BUT MAY BE SUBJECT TO CHANGE #
 capital_factor = 4.8
 
 # NEW TOKENOMIC PARAMETERS #
 # when MCR% < 1, duration in days for bond with extra interest
 entry_bond_length = 30
+# exponential curve shape
+entry_bond_max_interest = 0.02
+entry_bond_shape = 10
 
 # minimum duration in days before users can get funds out
 minimum_exit_period = 14
@@ -40,5 +42,7 @@ option_cost = 0.1
 base_exit_days = 60
 # maximum days linked to MCR%
 mcrp_max_days = 153
+mcrp_trigger = 1
+mcrp_threshold = 0.8
 # maximum days linked to relative size of exit queue
 queue_max_days = 153
