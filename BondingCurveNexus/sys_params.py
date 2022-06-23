@@ -1,13 +1,22 @@
 #-------------------------------------------------------------#
-# Define dictionary of fixed system parameters for simulation #
+# Define opening & fixed system parameters for simulation #
 #-------------------------------------------------------------#
 
+import requests
 
 # NEXUSTRACKER VALUES TODAY - UPDATES REQUIRED REGULARLY #
 # TODO: pull these in automatically
 nxm_supply_now = 6_789_404
 act_cover_now = 242_684
 cap_pool_now = 153_417
+
+# wnxm price from coingecko api
+url = 'https://api.coingecko.com/api/v3/simple/price'
+params = {
+        'ids':'wrapped-nxm',
+        'vs_currencies': 'eth'
+        }
+wnxm_price_now = requests.get(url, params=params).json()['wrapped-nxm']['eth']
 
 # SYSTEM PARAMETERS - CURRENT FIXED BUT MAY BE SUBJECT TO CHANGE #
 capital_factor = 4.8
