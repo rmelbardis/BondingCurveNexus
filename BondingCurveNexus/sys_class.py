@@ -82,7 +82,7 @@ class NexusSystem:
     def bond_bonus(self):
         return sys_params.entry_bond_max_interest * (1 - np.exp(
                                                     -sys_params.entry_bond_shape *
-                                                    self.mcrp(self.dca())
+                                                    self.mcrp(capital='dca')
                                                     )
                                                     )
 
@@ -90,7 +90,7 @@ class NexusSystem:
     def mcrp_exit_days(self):
         return sys_params.mcrp_max_days * min(1,
                                         max(0,
-                                        (sys_params.mcrp_trigger - self.mcrp(self.dca())) /
+                                        (sys_params.mcrp_trigger - self.mcrp(capital='dca')) /
                                         (sys_params.mcrp_trigger - sys_params.mcrp_threshold)
                                         ))
 
@@ -106,20 +106,25 @@ class NexusSystem:
     # create numpy row vector of nxm received with bonus at appropriate time
     # and append it to entry array
     # update parameters of system
-    def single_bond(self, eth):
-        # create empty row vector of maximum length
-        row_vec = np.zeros(model_params.model_days + sys_params.entry_bond_length)
+    def single_entry(self, eth):
         # work out number of nxm user could receive instantly (floor of book value)
-        nxm_now = eth / max(self.book_value(), self.wnxm_price)
-        # add bonus interest to instant nxm value
-        nxm_obtained = nxm_now * (1 + max(0, self.bond_bonus()))
-        # place value in appropriate time in row vector
-        row_vec[self.current_day + sys_params.entry_bond_length] = nxm_obtained
-        # append vector to entry array
-        self.entry_array = np.vstack((self.entry_array, row_vec))
-        # increase capital pool and number of nxm
+        nxm_obtained = eth / max(self.book_value(), self.wnxm_price)
+
+        # if mCR% < 1, encourage entries through bond interest
+        if self.mcrp(capital='dca') < 1:
+            # create empty row vector of maximum length
+            row_vec = np.zeros(model_params.model_days + sys_params.entry_bond_length)
+            # add bonus interest to instant nxm value
+            nxm_obtained = nxm_obtained * (1 + max(0, self.bond_bonus()))
+            # place value in appropriate time in row vector
+            row_vec[self.current_day + sys_params.entry_bond_length] = nxm_obtained
+            # append vector to entry array
+            self.entry_array = np.vstack((self.entry_array, row_vec))
+            # increase capital pool and number of nxm
+
         self.cap_pool += eth
         self.nxm_supply += nxm_obtained
+
         return self
 
     # create numpy row vector reflecting the possibilities of exit
@@ -135,7 +140,7 @@ class NexusSystem:
         start_day = self.current_day + sys_params.minimum_exit_period
         # if mcr% > 100%, user has option to exit after minimum waiting period
         # at full book value for 30 days
-        if self.mcrp(self.dca()) > 1:
+        if self.mcrp(capital='dca') > 1:
             ratio_array = np.ones(sys_params.option_exit_period)
             # replace relevant days with ones in array
             row_vec[start_day:start_day + sys_params.option_exit_period]
