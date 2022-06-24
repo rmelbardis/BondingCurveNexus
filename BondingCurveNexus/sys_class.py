@@ -211,8 +211,9 @@ class NexusSystem:
         # check whether size reduces mcrp below 1 & turn eth_size into maximum possible
         # such that mcrp doesn't go below 1
         if self.mcrp(self.dca()) > 1:
-            if self.mcrp(dca() - gap_eth_sale) <= 1:
-                    eth_size = dca() - mcr()
+            if self.mcrp(self.dca() - eth) <= 1:
+                return self.dca() - self.mcr()
+        return eth
 
     # simulate exits from exit queue in a single day
     def delayed_exits(self):
@@ -294,7 +295,7 @@ class NexusSystem:
         events_today.extend(['exit'] * self.base_daily_exits[self.current_day])
         events_today.extend(['wnxm_shift'])
         events_today.extend(['premium_income'])
-        events_today.extend(['claim_check'])
+        events_today.extend(['claim_outgo'])
         events_today.extend(['cover_amount_change'])
         events_today.extend(['delayed_exits'])
         events_today.extend(['investment_return'])
@@ -304,23 +305,14 @@ class NexusSystem:
         while self.wnxm_price < self.book_value()*\
                                 (1-model_params.wnxm_discount_to_book):
             # set assumed individual arbitrage sale size
-            eth_size = gap_eth_sale
+            eth_size = self.eth_sale_size(model_params.gap_eth_sale)
+            # add exit to exit queue
+            self.single_exit(eth=eth_size)
+            # move wNXM price (based on depth at t=0)
+            self.wnxm_price += sys_params.wnxm_price_now *\
+                                eth_size/model_params.wnxm_market_depth
 
-
-
-#                     # reduce nxm supply and remove ETH from capital pool
-#                     nxm_supply -= eth_size/wnxm_price  # book_value(dca())
-#                     cap_pool -= eth_size
-
-            # add row of potential NXM exits to exit array
-            exit_array = np.vstack((exit_array, single_exit(eth=eth_size)))
-#                     # burn 10% of NXM size
-#                     nxm_supply -= gap_eth_sale/book_value(dca()) * option_cost
-
-            # move wNXM price
-            wnxm_price *= 1 + gap_wnxm_move(eth_size)
-
-        # loop through day's events
+        # LOOP THROUGH EVENTS OF DAY
         for event in events_today:
             #-----SINGLE ENTRIES-----#
             if event == 'entry':
@@ -331,131 +323,61 @@ class NexusSystem:
                 eth_size = lognorm.rvs(s=model_params.sale_shape,
                                        loc=model_params.sale_loc,
                                        scale=model_params.sale_scale)
+
                 self.single_entry(eth=eth_size)
 
-            #-----SINGLE EXITS & GAP CLOSING-----#
+            #-----SINGLE EXITS-----#
             elif event == 'exit':
                 # no exits if wnxm price is above book
                 if self.wnxm_price > self.book_value():
                     continue
-
-
-
-
-                # SINGLE EXIT #
                 # draw exit size from lognormal distribution
-                eth_size = lognorm.rvs(s=sale_shape, loc=sale_loc, scale=sale_scale)
+                eth_size = lognorm.rvs(s=model_params.sale_shape,
+                                       loc=model_params.sale_loc,
+                                       scale=model_params.sale_scale)
+                # make sure sale doesn't take mcrp below 1
+                eth_size = self.eth_sale_size(eth_size)
 
-                    # if mcr% > 100%,
-                    # check whether size reduces mcrp below 1 & turn eth_size into maximum possible
-                    # such that mcrp doesn't go below 1
-                if mcrp(dca()) > 1:
-                    if mcrp(dca() - gap_eth_sale) <= 1:
-                        eth_size = dca() - mcr()
-
-        #             # reduce nxm supply and remove ETH from capital pool
-        #             nxm_supply -= eth_size/wnxm_price # book_value(dca())
-        #             cap_pool -= eth_size
-
-        #             # add to exit queue if mcrp <= 1
-        #             else:
-
-                # add single exit to the exit array
-                exit_array = np.vstack((exit_array, single_exit(eth=eth_size)))
-
-        #                 # burn 10% of NXM size
-        #                 nxm_supply -= eth_size/wnxm_price * option_cost # book_value(dca())
+                self.single_exit(eth=eth_size)
 
             #-----WNXM RANDOM MARKET MOVEMENT-----#
             elif event == 'wnxm_shift':
-                # percentage change according to pre-defined normal distribution
-                wnxm_price *= 1 + norm.rvs(loc=wnxm_drift, scale=wnxm_diffusion)
+                self.wnxm_shift()
 
             #-----PREMIUM INCOME TO POOL-----#
             elif event == 'premium_income':
-                # work out daily premium size in ETH assuming a lognormal distribution
-                daily_premiums = lognorm.rvs(s=premium_shape, loc=premium_loc, scale=premium_scale) * prem_claim_scaler
-                # 50% of premium size gets transformed to NXM and paid out to stakers
-                # entry is at wNXM price
-                cap_pool += daily_premiums
-                nxm_supply += 0.5 * daily_premiums/wnxm_price
-                cum_premiums += daily_premiums
+                self.premium_income()
 
             #-----DAILY CHANGE IN COVER AMOUNT-----#
             elif event == 'cover_amount_change':
-                # random fluctuation based on normal distribution
-                act_cover *= 1 + norm.rvs(loc=cover_amount_mean, scale=cover_amount_stdev)
+                self.cover_amount_shift()
 
             #-----CLAIM EVENT-----#
-            elif event == 'claim_check':
-                # check if claims occur
-                if np.random.random() > claim_prob:
-                    continue
-                # if a claim has occured, determine size
-                claim_size = lognorm.rvs(s=claim_shape, loc=claim_loc, scale=claim_scale) * prem_claim_scaler
-                # burn 50% of nxm at wnxm price and remove claims amount from capital pool
-                nxm_supply -= 0.5 * claim_size/wnxm_price
-                cap_pool -= claim_size
-                cum_claims += claim_size
-                # NB: could introduce wNXM shock if claim is over a certain size?
-
-            #-----BOND ENTRIES-----#
-            ### commented out because makes more sense to add NXM to supply immediately
-        #         elif event == 'bond_entries':
-        #             # sum up entries on current day and add to NXM supply
-        #             nxm_supply += np.sum(entry_array[:, current_day])
+            elif event == 'claim_outgo':
+                self.claim_payout()
 
             #-----DELAYED EXITS-----#
             elif event == 'delayed_exits':
-                # don't do this for first days within minimum exit period
-                if current_day < minimum_exit_period:
-                    continue
-
-                removal_rows = []
-                # slice exit array to current day & loop through entries
-                current_exits = exit_array[:, current_day]
-                for idx, number_nxm in np.ndenumerate(current_exits):
-                    # if value is non-zero, check whether user chooses to exit
-                    if number_nxm != 0:
-                        # successful exit
-                        if np.random.random() < p_exit(idx, number_nxm):
-                            # burn full NXM value of row
-                            nxm_supply -= np.max(exit_array[idx[0]])
-                            # remove eth value from capital pool
-                            cap_pool -= number_nxm * book_value(cap_pool)
-                            # add row to removal_rows
-                            removal_rows.append(idx[0])
-
-                    # check whether the option hasn't been exercised - row should be removed & option cost burnt
-                    elif exit_array[idx, current_day-1] != 0:
-                        nxm_supply -= option_cost*exit_array[idx[0], current_day-1]
-                        # add row to removal rows
-                        removal_rows.append(idx[0])
-
-
-                # remove rows from exit array:
-                exit_array = np.delete(exit_array, removal_rows, axis=0)
+                self.delayed_exits()
 
             #-----INVESTMENT RETURN-----#
             elif event == 'investment_return':
-                # daily return on capital pool
-                inv_return = daily_investment_return * cap_pool
-                cap_pool += inv_return
-                cum_investment += inv_return
+                self.investment_return()
 
-        mcr_prediction.append(mcr())
-        cap_pool_prediction.append(cap_pool)
-        exit_queue_eth_prediction.append(exit_queue_size())
-        exit_queue_nxm_prediction.append(exit_queue_size(denom='nxm'))
-        dca_prediction.append(dca())
-        book_value_prediction.append(book_value(cap_pool))
-        mcrp_prediction.append(mcrp(dca()))
-        wnxm_prediction.append(wnxm_price)
-        nxm_supply_prediction.append(nxm_supply)
-        premium_prediction.append(cum_premiums)
-        claim_prediction.append(cum_claims)
-        act_cover_prediction.append(act_cover)
-        num_exits_prediction.append(exit_array.shape[0])
-        investment_return_prediction.append(cum_investment)
+        # append values to tracking metrics
+        self.mcr_prediction.append(self.mcr())
+        self.cap_pool_prediction.append(self.cap_pool)
+        self.exit_queue_eth_prediction.append(self.exit_queue_size())
+        self.exit_queue_nxm_prediction.append(self.exit_queue_size(denom='nxm'))
+        self.dca_prediction.append(self.dca())
+        self.book_value_prediction.append(self.book_value())
+        self.mcrp_prediction.append(self.mcrp(self.dca()))
+        self.wnxm_prediction.append(self.wnxm_price)
+        self.nxm_supply_prediction.append(self.nxm_supply)
+        self.premium_prediction.append(self.cum_premiums)
+        self.claim_prediction.append(self.cum_claims)
+        self.act_cover_prediction.append(self.act_cover)
+        self.num_exits_prediction.append(self.exit_array.shape[0] - 1)
+        self.investment_return_prediction.append(self.cum_investment)
 
-        current_day += 1
+        self.current_day += 1
