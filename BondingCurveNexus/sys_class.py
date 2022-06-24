@@ -3,7 +3,7 @@ Define the Nexus Mutual system as a class
 This allows us to track the different variables as they change over time
 in a consistent manner.
 '''
-
+from scipy.stats import lognorm
 import numpy as np
 
 from BondingCurveNexus import sys_params
@@ -34,13 +34,17 @@ class NexusSystem:
         self.cum_investment = 0
 
         # create RANDOM VARIABLE ARRAYS for individual projection
-        # entries and exits using a poisson distribution
+        # base entries and exits using a poisson distribution
         self.daily_entries = np.random.poisson(lam=model_params.lambda_entries,
                                                 size=model_params.model_days)
         self.daily_exits = np.random.poisson(lam=model_params.lambda_exits,
                                                 size=model_params.model_days)
 
-        #
+        # base premium daily incomes using a lognormal distribution
+        self.daily_premiums = lognorm.rvs(s=model_params.premium_shape,
+                                          loc=model_params.premium_loc,
+                                          scale=model_params.premium_scale,
+                                          size=model_params.model_days)
 
     # INSTANCE FUNCTIONS to calculate a variety of ongoing metrics & parameters
     # and update the system
@@ -174,4 +178,10 @@ class NexusSystem:
         # append vector to exit array
         self.exit_array = np.vstack((self.exit_array, row_vec))
 
+        return self
+
+    def wnxm_shift(self):
+        self.wnxm_price *= (1 + np.random.normal(loc=model_params.wnxm_drift,
+                                                scale=model_params.wnxm_diffusion)
+                            )
         return self
