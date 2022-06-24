@@ -46,3 +46,5 @@ mcrp_trigger = 1
 mcrp_threshold = 0.8
 # maximum days linked to relative size of exit queue
 queue_max_days = 153
+queue_trigger = 0.1
+queue_threshold = 0.2

@@ -1,6 +1,7 @@
 '''
 Define the Nexus Mutual system as a class
-This allows us to track the different variables as they change over time.
+This allows us to track the different variables as they change over time
+in a consistent manner.
 '''
 
 import numpy as np
@@ -11,7 +12,7 @@ from BondingCurveNexus import model_params
 class NexusSystem:
 
     def __init__(self):
-        # opening state of system upon initializing a projection instance
+        # OPENING STATE of system upon initializing a projection instance
         self.current_day = 0
         self.act_cover = sys_params.act_cover_now
         self.nxm_supply = sys_params.nxm_supply_now
@@ -32,13 +33,16 @@ class NexusSystem:
         self.cum_claims = 0
         self.cum_investment = 0
 
-        # create randomized variables for individual projection
+        # create RANDOM VARIABLE ARRAYS for individual projection
+        # entries and exits using a poisson distribution
         self.daily_entries = np.random.poisson(lam=model_params.lambda_entries,
                                                 size=model_params.model_days)
         self.daily_exits = np.random.poisson(lam=model_params.lambda_exits,
                                                 size=model_params.model_days)
 
-    # instance functions to calculate a variety of ongoing metrics & parameters
+        #
+
+    # INSTANCE FUNCTIONS to calculate a variety of ongoing metrics & parameters
     # and update the system
 
     # calculate mcr from current cover amount
@@ -68,6 +72,10 @@ class NexusSystem:
     # Dynamic Current Assets - capital pool less exit queue
     def dca(self):
         return self.cap_pool - self.exit_queue_size()
+
+    # premium & claim scaling based on active cover
+    def prem_claim_scaler(self):
+        return self.act_cover / sys_params.act_cover_now
 
     # Bond bonus calculation, based on MCR% after allowing for exit queue
     # Function with upper limit on exponent, parameterised
