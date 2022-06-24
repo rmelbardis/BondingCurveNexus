@@ -53,5 +53,10 @@ wnxm_diffusion = 0.0655
 wnxm_discount_to_book = 0.05
 # assumed single trade for closing the gap
 gap_eth_sale = 60
+
 # probability of exit per day of being in the exit queue at 100% book value
 p_exit_full = 0.1
+# exponent applied to ratio for exiting below book value
+# e.g. if ratio of book value is 50%,
+#   multiplier of full daily exit prob is 0.5^exponent
+p_exit_exponent = 8
