@@ -61,7 +61,7 @@ def multi_sim():
     axs[2, 0].set_title('book_value')
     # Subplot
     axs[2, 1].hist(final_mcrp_list, bins=25)
-    axs[2, 1].set_xlim([0, 10])
+    axs[2, 1].set_xbound(lower=0.0, upper=10.0)
     axs[2, 1].set_title('mcrp')
     # Subplot
     axs[3, 0].hist(final_wnxm_list, bins=25)
