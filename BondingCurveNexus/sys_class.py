@@ -314,31 +314,45 @@ class NexusSystem:
 
         # LOOP THROUGH EVENTS OF DAY
         for event in events_today:
+
             #-----SINGLE ENTRIES-----#
             if event == 'entry':
-                # no entries if wnxm price is below book
-                if self.wnxm_price < self.book_value():
-                    continue
+
                 # draw entry size from lognormal distribution
                 eth_size = lognorm.rvs(s=model_params.sale_shape,
                                        loc=model_params.sale_loc,
                                        scale=model_params.sale_scale)
 
-                self.single_entry(eth=eth_size)
+                # no entries if wnxm price is below book,
+                # instead there is an impact on wnxm price
+                if self.wnxm_price < self.book_value():
+                    self.wnxm_price += sys_params.wnxm_price_now *\
+                                eth_size/model_params.wnxm_market_depth
+
+                else:
+                    # add single entry to pool
+                    self.single_entry(eth=eth_size)
 
             #-----SINGLE EXITS-----#
             elif event == 'exit':
-                # no exits if wnxm price is above book
-                if self.wnxm_price > self.book_value():
-                    continue
+
+
                 # draw exit size from lognormal distribution
                 eth_size = lognorm.rvs(s=model_params.sale_shape,
                                        loc=model_params.sale_loc,
                                        scale=model_params.sale_scale)
-                # make sure sale doesn't take mcrp below 1
-                eth_size = self.eth_sale_size(eth_size)
 
-                self.single_exit(eth=eth_size)
+                # no exits from pool if wnxm price is above book,
+                # instead there is an impact on wnxm price
+                if self.wnxm_price > self.book_value():
+                    self.wnxm_price -= sys_params.wnxm_price_now *\
+                                eth_size/model_params.wnxm_market_depth
+
+                else:
+                    # make sure sale doesn't take mcrp below 1
+                    eth_size = self.eth_sale_size(eth_size)
+                    # add single exit from pool
+                    self.single_exit(eth=eth_size)
 
             #-----WNXM RANDOM MARKET MOVEMENT-----#
             elif event == 'wnxm_shift':
