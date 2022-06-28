@@ -3,8 +3,8 @@ Function for running a single simulation
 '''
 
 import matplotlib.pyplot as plt
-
 import numpy as np
+from tqdm import tqdm
 
 from BondingCurveNexus.sys_class import NexusSystem
 from BondingCurveNexus.model_params import model_days
@@ -15,7 +15,7 @@ def single_sim():
 
     sim = NexusSystem()
 
-    for i in range(model_days):
+    for i in tqdm(range(model_days)):
         sim.one_day_passes()
 
     #-----GRAPHS-----#

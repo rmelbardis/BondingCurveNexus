@@ -12,9 +12,13 @@ lambda_exits = 10
 
 # lognormal distribution of size of ENTRIES AND EXITS in ETH
 # parameterised to median value being ~1 ETH, upper quartile ~4-5 ETH
-sale_shape = 2
-sale_loc = 0
-sale_scale = 1
+entry_shape = 2
+entry_loc = 0
+entry_scale = 1
+
+exit_shape = 2
+exit_loc = 100
+exit_scale = 1
 
 # normal distribution of daily change in active COVER AMOUNT
 cover_amount_mean = 0.005

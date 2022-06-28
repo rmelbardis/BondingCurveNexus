@@ -314,44 +314,34 @@ class NexusSystem:
 
         # LOOP THROUGH EVENTS OF DAY
         for event in events_today:
-
             #-----SINGLE ENTRIES-----#
             if event == 'entry':
-
-                # draw entry size from lognormal distribution
-                eth_size = lognorm.rvs(s=model_params.sale_shape,
-                                       loc=model_params.sale_loc,
-                                       scale=model_params.sale_scale)
-
                 # no entries if wnxm price is below book,
-                # instead there is an impact on wnxm price
+                # instead move wnxm price up by 0.1%
                 if self.wnxm_price < self.book_value():
-                    self.wnxm_price += sys_params.wnxm_price_now *\
-                                eth_size/model_params.wnxm_market_depth
-
+                    self.wnxm_price *= 1.001
+                # draw entry size from lognormal distribution
                 else:
-                    # add single entry to pool
+                    eth_size = lognorm.rvs(s=model_params.entry_shape,
+                                       loc=model_params.entry_loc,
+                                       scale=model_params.entry_scale)
+
                     self.single_entry(eth=eth_size)
 
             #-----SINGLE EXITS-----#
             elif event == 'exit':
-
-
-                # draw exit size from lognormal distribution
-                eth_size = lognorm.rvs(s=model_params.sale_shape,
-                                       loc=model_params.sale_loc,
-                                       scale=model_params.sale_scale)
-
-                # no exits from pool if wnxm price is above book,
-                # instead there is an impact on wnxm price
+                # no exits if wnxm price is above book
+                # instead move wnxm price down by 0.1%
                 if self.wnxm_price > self.book_value():
-                    self.wnxm_price -= sys_params.wnxm_price_now *\
-                                eth_size/model_params.wnxm_market_depth
-
+                    self.wnxm_price *= 0.999
                 else:
+                # draw exit size from lognormal distribution
+                    eth_size = lognorm.rvs(s=model_params.exit_shape,
+                                        loc=model_params.exit_loc,
+                                        scale=model_params.exit_scale)
                     # make sure sale doesn't take mcrp below 1
                     eth_size = self.eth_sale_size(eth_size)
-                    # add single exit from pool
+
                     self.single_exit(eth=eth_size)
 
             #-----WNXM RANDOM MARKET MOVEMENT-----#
