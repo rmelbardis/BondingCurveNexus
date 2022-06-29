@@ -84,8 +84,9 @@ class NexusSystem:
     # and update the system accordingly
 
     # calculate mcr from current cover amount
+    # minimum of 1 ETH to avoid division by zero
     def mcr(self):
-        return self.act_cover / sys_params.capital_factor
+        return min(1, self.act_cover / sys_params.capital_factor)
 
     # calculate mcr% from current assets and mcr size.
     # Specify whether to use all current assets or remove exit queue

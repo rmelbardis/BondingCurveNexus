@@ -3,7 +3,7 @@ Define fixed modelling parameters for simulation
 '''
 
 # number of days to run the model for
-model_days = 366
+model_days = 730
 
 # mean number of users entering and exiting the system
 # to be modelled by poisson distribution
@@ -17,11 +17,11 @@ entry_loc = 0
 entry_scale = 1
 
 exit_shape = 2
-exit_loc = 0
+exit_loc = 400
 exit_scale = 1
 
 # normal distribution of daily change in active COVER AMOUNT
-cover_amount_mean = 0.005
+cover_amount_mean = 0
 cover_amount_stdev = 0.07
 
 # lognormal distribution of daily PREMIUM INCOME
