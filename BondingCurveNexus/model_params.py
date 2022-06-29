@@ -17,7 +17,7 @@ entry_loc = 0
 entry_scale = 1
 
 exit_shape = 2
-exit_loc = 100
+exit_loc = 0
 exit_scale = 1
 
 # normal distribution of daily change in active COVER AMOUNT
