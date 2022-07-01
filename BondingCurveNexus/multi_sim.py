@@ -10,9 +10,7 @@ from tqdm import tqdm
 from BondingCurveNexus.sys_class import NexusSystem
 from BondingCurveNexus.model_params import model_days
 
-# if __name__ == "__main__":
-
-def multi_sim():
+if __name__ == "__main__":
 
     # define number of sims and initialise number of instances
     num_sims = 100

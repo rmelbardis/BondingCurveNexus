@@ -3,7 +3,7 @@ Define fixed modelling parameters for simulation
 '''
 
 # number of days to run the model for
-model_days = 365
+model_days = 730
 
 # mean number of users entering and exiting the system
 # to be modelled by poisson distribution

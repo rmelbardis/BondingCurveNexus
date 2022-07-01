@@ -83,14 +83,14 @@ class NexusSystem:
     # and update the system accordingly
 
     # calculate mcr from current cover amount
-    # minimum of 1 ETH to avoid division by zero
+    # minimum of 0.01 ETH to avoid division by zero
     def mcr(self):
-        return max(1, self.act_cover / sys_params.capital_factor)
+        return max(0.01, self.act_cover / sys_params.capital_factor)
 
     # calculate mcr% from current assets and mcr size.
     # Specify whether to use all current assets or remove exit queue
     def mcrp(self, capital):
-        return capital/self.mcr()
+        return min(20, capital/self.mcr())
 
     # calculate book value from current assets & nxm supply.
     def book_value(self):
@@ -240,7 +240,7 @@ class NexusSystem:
         # in practice the users will choose NXM amount they want to sell
         # nxm value row represent the amount that the user gets relative to book value
         # in practice user will always burn the full amount of NXM
-        nxm = eth/self.book_value()
+        nxm = min(eth/self.book_value(), self.nxm_supply)
 
         # place full nxm value in final position on row vector
         row_vec[3] = nxm
@@ -248,7 +248,7 @@ class NexusSystem:
         # append vector to exit array
         self.exit_array = np.vstack((self.exit_array, row_vec))
 
-    # eth sizer - throttle size of sale if it takes mcrp below 1
+    # eth sizer - throttle size of sale if pushing up against limits
     def eth_sale_size(self, eth):
         # if mcr% > 100%,
         # check whether size reduces mcrp below 1 & turn eth_size into maximum possible
@@ -267,6 +267,9 @@ class NexusSystem:
         if self.exit_queue_size(denom='nxm') + eth/self.book_value() > self.nxm_supply:
             eth = (self.nxm_supply - self.exit_queue_size(denom='nxm')) * self.book_value()
 
+        # don't allow sales for more than there is in the capital pool
+        eth = min(eth, self.cap_pool)
+
         return eth
 
     # exits from exit queue in a single day
@@ -281,10 +284,12 @@ class NexusSystem:
 
         # deal with exits that happen
         today_exits = today_array[today_array[:, 0] == 1]
-        # burn nxm value
-        self.nxm_supply -= np.sum(today_exits[:, 3])
-        # remove value of nxm from capital pool
-        self.cap_pool -= np.sum(today_exits[:, 2] * today_exits[:, 3]) * self.book_value()
+        # burn nxm value (limit to 0)
+        self.nxm_supply = max(self.nxm_supply - np.sum(today_exits[:, 3]), 0)
+        # remove value of nxm from capital pool (limit to 0)
+        self.cap_pool = max(0,
+                        self.cap_pool - np.sum(today_exits[:, 2] * today_exits[:, 3])
+                        * self.book_value())
 
         # remove today's exit rows from exit array
         self.exit_array = self.exit_array[self.exit_array[:, 1] != self.current_day]
@@ -298,34 +303,38 @@ class NexusSystem:
         # no buys allowed
         if (self.nxm_supply - self.exit_queue_size(denom='nxm')) *\
             sys_params.capital_factor < self.act_cover/self.wnxm_price:
-            self.act_cover -= model_params.cover_amount_drop
+            self.act_cover = max(0, self.act_cover - model_params.cover_amount_drop)
 
         # normal scenario
         else:
             self.act_cover *= (1 + self.base_daily_cover_change[self.current_day])
 
     # premium & claim scaling based on active cover vs opening active cover
-    def prem_claim_scaler(self):
+    def act_cover_scaler(self):
         return self.act_cover / sys_params.act_cover_now
 
     # daily premium income and additions to nxm supply & cap pool
+    # (scaled relative to active cover amount)
     # logged in cumulative premiums
     def premium_income(self):
-        daily_premium = self.base_daily_premiums[self.current_day] * self.prem_claim_scaler()
+        daily_premium = self.base_daily_premiums[self.current_day] *\
+                        self.act_cover_scaler()
         self.cap_pool += daily_premium
         self.nxm_supply += 0.5 * daily_premium/self.wnxm_price
         self.cum_premiums += daily_premium
 
     # claim payout - checks whether there are claims and if there is
-    # size is randomised using a lognormal distribution
+    # size is randomised using a lognormal distribution (scaled relative to active cover amount)
     # claim amount is removed from pool and 50% of corresponding staking nxm burnt
     # logged in cumulative claims
     def claim_payout(self):
         if self.claim_rolls[self.current_day] < model_params.claim_prob:
             claim_size = lognorm.rvs(s=model_params.claim_shape,
                                      loc=model_params.claim_loc,
-                                     scale=model_params.claim_scale)
-            self.nxm_supply -= 0.5 * claim_size/self.wnxm_price
+                                     scale=model_params.claim_scale) *\
+                            self.act_cover_scaler()
+
+            self.nxm_supply = max(0, self.nxm_supply - 0.5 * claim_size/self.wnxm_price)
             self.cap_pool = max(0, self.cap_pool - claim_size)
             self.cum_claims += claim_size
 
@@ -368,10 +377,12 @@ class NexusSystem:
                 if self.wnxm_price < self.book_value():
                     self.wnxm_price *= (1 + model_params.wnxm_entry_change)
                 # draw entry size from lognormal distribution
+                # scaled to active cover amount (mainly to avoid buys when no cover)
                 else:
                     eth_size = lognorm.rvs(s=model_params.entry_shape,
                                        loc=model_params.entry_loc,
-                                       scale=model_params.entry_scale)
+                                       scale=model_params.entry_scale)\
+                                        * self.act_cover_scaler()
 
                     self.single_entry(eth=eth_size)
 
