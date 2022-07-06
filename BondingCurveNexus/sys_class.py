@@ -116,7 +116,7 @@ class NexusSystem:
     def bond_bonus(self):
         return sys_params.entry_bond_max_interest * (1 - np.exp(
                                                     -sys_params.entry_bond_shape *
-                                                    self.mcrp(self.dca())
+                                                    (1 - self.mcrp(self.dca()))
                                                     )
                                                     )
 

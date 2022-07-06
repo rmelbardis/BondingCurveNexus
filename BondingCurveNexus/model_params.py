@@ -17,7 +17,7 @@ entry_loc = 0
 entry_scale = 1
 
 exit_shape = 2
-exit_loc = 100
+exit_loc = 0
 exit_scale = 1
 
 # normal distribution of daily change in active COVER AMOUNT
@@ -56,7 +56,7 @@ wnxm_diffusion = 0.0655
 
 # entry and exit percentage change in price
 wnxm_entry_change = 0.001
-wnxm_exit_change = 0.03
+wnxm_exit_change = 0.001
 
 # parameters related to closing wnxm gap to book value
 # time preference of users
