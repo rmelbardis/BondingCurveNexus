@@ -21,7 +21,7 @@ exit_loc = 0
 exit_scale = 1
 
 # normal distribution of daily change in active COVER AMOUNT
-cover_amount_mean = 0.0065
+cover_amount_mean = 0.002
 cover_amount_stdev = 0.07
 # on days where no cover is allowed, drop amount
 cover_amount_drop = 4000

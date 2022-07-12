@@ -302,7 +302,7 @@ class NexusSystem:
     def cover_amount_shift(self):
         # no buys allowed
         if (self.nxm_supply - self.exit_queue_size(denom='nxm')) *\
-            sys_params.capital_factor < self.act_cover/self.wnxm_price:
+            sys_params.stake_ceil_factor < self.act_cover/self.wnxm_price:
             self.act_cover = max(0, self.act_cover - model_params.cover_amount_drop)
 
         # normal scenario
@@ -335,6 +335,7 @@ class NexusSystem:
                             self.act_cover_scaler()
 
             self.nxm_supply = max(0, self.nxm_supply - 0.5 * claim_size/self.wnxm_price)
+            self.nxm_supply += model_params.claim_ass_reward * claim_size/self.wnxm_price
             self.cap_pool = max(0, self.cap_pool - claim_size)
             self.cum_claims += claim_size
 
