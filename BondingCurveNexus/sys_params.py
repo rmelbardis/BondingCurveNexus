@@ -5,9 +5,9 @@ import requests
 
 # NEXUSTRACKER VALUES TODAY - UPDATES REQUIRED REGULARLY #
 # TODO: pull these in automatically
-nxm_supply_now = 6_789_404
-act_cover_now = 242_684
-cap_pool_now = 153_417
+nxm_supply_now = 6_787_281
+act_cover_now = 150_565
+cap_pool_now = 153_460
 
 # wnxm price from coingecko api
 url = 'https://api.coingecko.com/api/v3/simple/price'
@@ -21,6 +21,12 @@ wnxm_price_now = requests.get(url, params=params).json()['wrapped-nxm']['eth']
 capital_factor = 4.8
 
 # NEW TOKENOMIC PARAMETERS #
+
+# Factor of free NXM that needs to be breached by cover amount
+# before purchases are stopped
+# composed of 20x potential staking leverage and syndicates operating a 50% QS (2x)
+stake_ceil_factor = 40
+
 # when MCR% < 1, duration in days for bond with extra interest
 entry_bond_length = 30
 # exponential curve shape

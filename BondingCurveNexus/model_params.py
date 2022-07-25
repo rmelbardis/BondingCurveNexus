@@ -3,7 +3,7 @@ Define fixed modelling parameters for simulation
 '''
 
 # number of days to run the model for
-model_days = 366
+model_days = 730
 
 # mean number of users entering and exiting the system
 # to be modelled by poisson distribution
@@ -20,9 +20,15 @@ exit_shape = 2
 exit_loc = 0
 exit_scale = 1
 
+# entry and exit percentage change in price when it's a wNXM transaction instead
+wnxm_entry_change = 0.001
+wnxm_exit_change = 0.001
+
 # normal distribution of daily change in active COVER AMOUNT
-cover_amount_mean = 0.005
+cover_amount_mean = 0.002
 cover_amount_stdev = 0.07
+# on days where no cover is allowed, drop amount
+cover_amount_drop = 4000
 
 # lognormal distribution of daily PREMIUM INCOME
 # parameterised to have median value of a handful of ETH,
@@ -54,17 +60,22 @@ wnxm_diffusion = 0.0655
 
 # parameters related to closing wnxm gap to book value
 # time preference of users
-wnxm_discount_to_book = 0.05
+wnxm_discount_to_book = 0.1
 # assumed single trade for closing the gap
-gap_eth_sale = 10
-# assume it takes 60 ETH to move the market 2%
-# rough approximation according to sum of all exchanges in coingecko
-wnxm_market_depth = 3000
+gap_eth_sale = 200
+# assume this increases nxm price by 5%
+wnxm_arb_change = 0.05
 
 
-# probability of exit per day of being in the exit queue at 100% book value
-p_exit_full = 0.1
-# exponent applied to ratio for exiting below book value
-# e.g. if ratio of book value is 50%,
-# multiplier of full daily exit prob is 0.5^exponent
-p_exit_exponent = 8
+# probability of actual exit
+# set to same for short and long periods
+p_exit = 0.95
+# for exits below 100% mcr%
+# if exit is successful, probability that exit is at 100% BV
+p_exit_full_bv = 0.9
+# if not at full book value:
+# threshold of bv
+exit_bv_threshold = 0.5
+# probability that exit is somewhere above threshold
+p_exit_above_threshold = 0.9
+# currently 1% chance of exiting below 50% bv

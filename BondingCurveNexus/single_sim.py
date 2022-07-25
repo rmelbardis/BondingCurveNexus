@@ -9,9 +9,7 @@ from tqdm import tqdm
 from BondingCurveNexus.sys_class import NexusSystem
 from BondingCurveNexus.model_params import model_days
 
-# if __name__ == "__main__":
-
-def single_sim():
+if __name__ == "__main__":
 
     sim = NexusSystem()
 
