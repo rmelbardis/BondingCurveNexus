@@ -13,7 +13,7 @@ lambda_exits = 10
 # lognormal distribution of size of ENTRIES AND EXITS in ETH
 # parameterised to median value being ~1 ETH, upper quartile ~4-5 ETH
 entry_shape = 2
-entry_loc = 20
+entry_loc = 0
 entry_scale = 1
 
 exit_shape = 2
@@ -21,11 +21,11 @@ exit_loc = 0
 exit_scale = 1
 
 # entry and exit percentage change in price when it's a wNXM transaction instead
-wnxm_entry_change = 0.01
+wnxm_entry_change = 0.001
 wnxm_exit_change = 0.001
 
 # normal distribution of daily change in active COVER AMOUNT
-cover_amount_mean = 0.0065
+cover_amount_mean = 0.002
 cover_amount_stdev = 0.07
 # on days where no cover is allowed, drop amount
 cover_amount_drop = 4000
