@@ -10,12 +10,15 @@ act_cover_now = 134_041
 cap_pool_now = 138_156
 
 # wnxm price from coingecko api
-url = 'https://api.coingecko.com/api/v3/simple/price'
-params = {
+price_url = 'https://api.coingecko.com/api/v3/simple/price'
+price_params = {
         'ids':'wrapped-nxm',
         'vs_currencies': 'eth'
         }
-wnxm_price_now = requests.get(url, params=params).json()['wrapped-nxm']['eth']
+wnxm_price_now = requests.get(price_url, params=params).json()['wrapped-nxm']['eth']
+# wnxm supply from coingecko api
+supply_url = 'https://api.coingecko.com/api/v3/coins/wrapped-nxm'
+wnxm_supply_now = requests.get(supply_url).json()['wrapped-nxm']['eth']
 
 # SYSTEM PARAMETERS - CURRENTLY FIXED BUT MAY BE SUBJECT TO CHANGE #
 capital_factor = 4.8
