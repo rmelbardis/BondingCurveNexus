@@ -5,9 +5,9 @@ import requests
 
 # NEXUSTRACKER VALUES TODAY - UPDATES REQUIRED REGULARLY #
 # TODO: pull these in automatically
-nxm_supply_now = 6_785_719
-act_cover_now = 134_041
-cap_pool_now = 138_156
+nxm_supply_now = 6_785_854
+act_cover_now = 133_166
+cap_pool_now = 138_194
 
 # wnxm price from coingecko api
 price_url = 'https://api.coingecko.com/api/v3/simple/price'
@@ -15,10 +15,10 @@ price_params = {
         'ids':'wrapped-nxm',
         'vs_currencies': 'eth'
         }
-wnxm_price_now = requests.get(price_url, params=params).json()['wrapped-nxm']['eth']
+wnxm_price_now = requests.get(price_url, params=price_params).json()['wrapped-nxm']['eth']
 # wnxm supply from coingecko api
 supply_url = 'https://api.coingecko.com/api/v3/coins/wrapped-nxm'
-wnxm_supply_now = requests.get(supply_url).json()['wrapped-nxm']['eth']
+wnxm_supply_now = requests.get(supply_url).json()['market_data']['total_supply']
 
 # SYSTEM PARAMETERS - CURRENTLY FIXED BUT MAY BE SUBJECT TO CHANGE #
 capital_factor = 4.8
