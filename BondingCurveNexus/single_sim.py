@@ -20,17 +20,17 @@ if __name__ == "__main__":
 
     #-----GRAPHS-----#
     # Destructuring initialization
-    fig, axs = plt.subplots(10, 2, figsize=(15,27)) # axs is a (10,2) nd-array
+    fig, axs = plt.subplots(10, 2, figsize=(15,40)) # axs is a (10,2) nd-array
 
     # Subplot
     axs[0, 0].plot(range(model_days+1), sim.mcr_prediction)
     axs[0, 0].set_title('mcr')
     # Subplot
-    axs[0, 1].plot(range(model_days+1), sim.cap_pool_prediction)
-    axs[0, 1].set_title('cap_pool')
+    axs[0, 1].plot(range(model_days+1), sim.act_cover_prediction)
+    axs[0, 1].set_title('active_cover')
     # Subplot
-    axs[1, 0].plot(range(model_days+1), sim.act_cover_prediction)
-    axs[1, 0].set_title('active_cover')
+    axs[1, 0].plot(range(model_days+1), sim.cap_pool_prediction)
+    axs[1, 0].set_title('cap_pool')
     # Subplot
     axs[1, 1].plot(range(model_days+1), sim.mcrp_prediction)
     axs[1, 1].plot(range(model_days+1), np.ones(model_days+1), color='red')

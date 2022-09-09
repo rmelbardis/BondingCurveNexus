@@ -3,7 +3,7 @@ Define fixed modelling parameters for simulation
 '''
 
 # number of days to run the model for
-model_days = 366
+model_days = 730
 
 # mean number of users entering and exiting the system
 # to be modelled by poisson distribution
@@ -20,11 +20,9 @@ exit_shape = 2
 exit_loc = 0
 exit_scale = 1
 
-# normal distribution of daily change in active COVER AMOUNT
-cover_amount_mean = 0.002
-cover_amount_stdev = 0.07
-# on days where no cover is allowed, drop amount
-cover_amount_drop = 4000
+# normal distribution of daily % change in active COVER AMOUNT
+cover_amount_mean = 0.001
+cover_amount_stdev = 0.01
 
 # lognormal distribution of daily PREMIUM INCOME
 # parameterised to have median value of a handful of ETH,
