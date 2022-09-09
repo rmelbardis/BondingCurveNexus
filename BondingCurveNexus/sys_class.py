@@ -77,8 +77,8 @@ class NexusSystem:
 
         # create tracking lists for individual instance
         self.mcr_prediction = [self.mcr()] #1
-        self.cap_pool_prediction = [self.cap_pool] #2
-        self.act_cover_prediction = [self.act_cover] #3
+        self.act_cover_prediction = [self.act_cover] #2
+        self.cap_pool_prediction = [self.cap_pool] #3
         self.mcrp_prediction = [self.mcrp()] #4
         self.nxm_price_prediction = [self.nxm_price()] #5
         self.wnxm_price_prediction = [self.wnxm_price] #6
@@ -351,8 +351,8 @@ class NexusSystem:
 
         # append values to tracking metrics
         self.mcr_prediction.append(self.mcr()) #1
-        self.cap_pool_prediction.append(self.cap_pool) #2
-        self.act_cover_prediction.append(self.act_cover) #3
+        self.act_cover_prediction.append(self.act_cover) #2
+        self.cap_pool_prediction.append(self.cap_pool) #3
         self.mcrp_prediction.append(self.mcrp()) #4
         self.nxm_price_prediction.append(self.nxm_price()) #5
         self.wnxm_price_prediction.append(self.wnxm_price) #6
