@@ -81,15 +81,15 @@ class NexusSystem:
         self.act_cover_prediction = [self.act_cover] #3
         self.mcrp_prediction = [self.mcrp()] #4
         self.nxm_price_prediction = [self.nxm_price()] #5
-        self.liquidity_nxm_prediction = [self.liquidity_nxm] #6
-        self.liquidity_eth_prediction = [self.liquidity_eth] #7
-        self.wnxm_price_prediction = [self.wnxm_price] #8
+        self.wnxm_price_prediction = [self.wnxm_price] #6
+        self.liquidity_nxm_prediction = [self.liquidity_nxm] #7
+        self.liquidity_eth_prediction = [self.liquidity_eth]  #8
         self.nxm_supply_prediction = [self.nxm_supply] #9
         self.wnxm_supply_prediction = [self.wnxm_supply] #10
         self.book_value_prediction = [self.book_value()] #11
-        self.premium_prediction = [self.cum_premiums] #12
-        self.claim_prediction = [self.cum_claims] #13
-        self.investment_return_prediction = [self.cum_investment] #14
+        self.cum_premiums_prediction = [self.cum_premiums] #12
+        self.cum_claims_prediction = [self.cum_claims] #13
+        self.cum_investment_prediction = [self.cum_investment] #14
         self.eth_sold_prediction = [self.eth_sold] #15
         self.eth_acquired_prediction = [self.eth_acquired] #16
         self.nxm_burned_prediction = [self.nxm_burned] #17
@@ -355,15 +355,15 @@ class NexusSystem:
         self.act_cover_prediction.append(self.act_cover) #3
         self.mcrp_prediction.append(self.mcrp()) #4
         self.nxm_price_prediction.append(self.nxm_price()) #5
-        self.liquidity_nxm_prediction.append(self.liquidity_nxm) #6
-        self.liquidity_eth_prediction.append(self.liquidity_eth) #7
-        self.wnxm_price_prediction.append(self.wnxm_price) #8
+        self.wnxm_price_prediction.append(self.wnxm_price) #6
+        self.liquidity_nxm_prediction.append(self.liquidity_nxm) #7
+        self.liquidity_eth_prediction.append(self.liquidity_eth) #8
         self.nxm_supply_prediction.append(self.nxm_supply) #9
         self.wnxm_supply_prediction.append(self.wnxm_supply) #10
         self.book_value_prediction.append(self.book_value()) #11
-        self.premium_prediction.append(self.cum_premiums) #12
-        self.claim_prediction.append(self.cum_claims) #13
-        self.investment_return_prediction.append(self.cum_investment) #14
+        self.cum_premiums_prediction.append(self.cum_premiums) #12
+        self.cum_claims_prediction.append(self.cum_claims) #13
+        self.cum_investment_prediction.append(self.cum_investment) #14
         self.eth_sold_prediction.append(self.eth_sold) #15
         self.eth_acquired_prediction.append(self.eth_acquired) #16
         self.nxm_burned_prediction.append(self.nxm_burned) #17
