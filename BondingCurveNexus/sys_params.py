@@ -9,14 +9,14 @@ nxm_supply_now = 6_784_365
 act_cover_now = 116_133
 cap_pool_now = 153_590
 
-
+# coingecko price api
 price_url = 'https://api.coingecko.com/api/v3/simple/price'
 # eth price from coingecko api
 eth_price_params = {
         'ids':'ethereum',
         'vs_currencies': 'usd'
         }
-usd_price_usd = requests.get(price_url, params=eth_price_params).json()['ethereum']['usd']
+eth_price_usd = requests.get(price_url, params=eth_price_params).json()['ethereum']['usd']
 
 # wnxm price from coingecko api
 wnxm_price_params = {
@@ -33,3 +33,11 @@ wnxm_supply_now = requests.get(supply_url).json()['market_data']['total_supply']
 capital_factor = 4.8
 
 # NEW TOKENOMIC PARAMETERS #
+
+# free capital
+free_capital_perc = 0.5
+free_capital = cap_pool_now * free_capital_perc
+
+# ratchet mechanism speed
+ratchet_up_perc = 0.005
+ratchet_down_perc = 0.005
