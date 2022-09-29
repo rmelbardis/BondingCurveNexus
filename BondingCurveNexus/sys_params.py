@@ -5,9 +5,9 @@ import requests
 
 # NEXUSTRACKER VALUES TODAY - UPDATES REQUIRED REGULARLY #
 # TODO: pull these in automatically
-nxm_supply_now = 6_784_365
-act_cover_now = 116_133
-cap_pool_now = 153_590
+nxm_supply_now = 6_784_375
+act_cover_now = 143_868
+cap_pool_now = 153_789
 
 # coingecko price api
 price_url = 'https://api.coingecko.com/api/v3/simple/price'
