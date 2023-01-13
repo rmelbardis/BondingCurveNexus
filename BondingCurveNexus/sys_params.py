@@ -5,8 +5,7 @@ import requests
 
 # NEXUSTRACKER VALUES TODAY - UPDATES REQUIRED REGULARLY #
 # TODO: pull these in automatically
-nxm_supply_now = 6_775_867
-act_cover_now = 116_720
+act_cover_now = 125_280
 cap_pool_now = 145_832
 
 # coingecko price api
@@ -26,18 +25,26 @@ wnxm_price_params = {
 wnxm_price_now = requests.get(price_url, params=wnxm_price_params).json()['wrapped-nxm']['eth']
 
 # wnxm supply from coingecko api
-supply_url = 'https://api.coingecko.com/api/v3/coins/wrapped-nxm'
-wnxm_supply_now = requests.get(supply_url).json()['market_data']['total_supply']
+wnxm_supply_url = 'https://api.coingecko.com/api/v3/coins/wrapped-nxm'
+wnxm_supply_now = requests.get(wnxm_supply_url).json()['market_data']['total_supply']
+
+# nxm supply from coingecko api
+nxm_supply_url = 'https://api.coingecko.com/api/v3/coins/nxm'
+nxm_supply_now = requests.get(nxm_supply_url).json()['market_data']['total_supply']
 
 # SYSTEM PARAMETERS - CURRENTLY FIXED BUT MAY BE SUBJECT TO CHANGE #
 capital_factor = 4.8
 
 # NEW TOKENOMIC PARAMETERS #
 
-# free capital
-free_capital_perc = 0.5
-free_capital = cap_pool_now * free_capital_perc
+# opening and target liquidity in ETH
+open_liq = 25_000
+target_liq = 2500
 
 # ratchet mechanism speed
-ratchet_up_perc = 0.005
-ratchet_down_perc = 0.005
+ratchet_up_perc = 0.04
+ratchet_down_perc = 0.04
+
+# liquidity injection speed
+liq_in_perc = 0.04
+liq_out_perc = 0.04

@@ -4,13 +4,6 @@ Parameters for simulation that are derived from functions
 
 from BondingCurveNexus import sys_params
 
-# opening liquidity based on input percentage of 'free' capital
-def open_liq(liq_alloc_perc):
-    return liq_alloc_perc * sys_params.free_capital
-
-# movement in wNXM price, expressed as an ETH value
-# based on 1 ETH worth of wNXM bought or sold
-# takes USD value required to move wNXM price 2% based on current wNXM as input
 def wnxm_movement_per_eth(two_perc_liq_usd):
 
     # find amount of ETH that it would take to move current wNXM price 2%

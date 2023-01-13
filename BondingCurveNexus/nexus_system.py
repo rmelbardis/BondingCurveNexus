@@ -1,5 +1,5 @@
 '''
-Define the Nexus Mutual system as a class
+Define the whole Nexus Mutual system as a class
 This allows us to track the different variables as they change over time
 in a consistent manner.
 Buying and selling mechanism is a virtual Uni v2 pool
@@ -9,7 +9,7 @@ from scipy.stats import lognorm
 import numpy as np
 from random import shuffle
 
-from BondingCurveNexus import sys_params, model_params, param_functions
+from BondingCurveNexus import sys_params, model_params
 
 class NexusSystem:
 
