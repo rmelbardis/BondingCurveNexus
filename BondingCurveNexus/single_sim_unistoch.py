@@ -1,7 +1,8 @@
 '''
-Running a single deterministic simulation of the market parameters only:
+Running a single stochastic simulation of the market parameters only:
  - buying from protocol
  - selling to protocol
+ - wNXM market movements
  - wNXM-NXM arbitrage
 '''
 
@@ -10,15 +11,16 @@ import numpy as np
 from tqdm import tqdm
 
 from BondingCurveNexus import sys_params
-from BondingCurveNexus.uni_det import UniDet
+from BondingCurveNexus.uni_stoch import UniStoch
 from BondingCurveNexus.model_params import model_days
 
 
-#-----GRAPHS-----#
+#-----GRAPH FUNCTION-----#
 def show_graphs():
     # Destructuring initialization
     fig, axs = plt.subplots(4, 2, figsize=(15,20))
-    fig.suptitle('One-sided Stochastic Model - 1 ratio of buys/sales', fontsize=16)
+    # set & format title of whole graph system
+    fig.suptitle('One-sided Stochastic Model - 1.2 ratio of buys/sales', fontsize=16)
     fig.tight_layout()
     fig.subplots_adjust(top=0.95)
 
@@ -71,7 +73,7 @@ def show_graphs():
 
 if __name__ == "__main__":
 
-    sim = UniDet()
+    sim = UniStoch()
     days_run = 0
 
     for i in tqdm(range(model_days)):

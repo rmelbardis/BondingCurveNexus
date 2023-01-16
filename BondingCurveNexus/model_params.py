@@ -11,7 +11,7 @@ model_days = 730
 #### ---- MARKET PARAMETERS ---- ####
 # mean number of users entering and exiting the system
 # to be modelled by poisson distribution, or used as deterministic number
-lambda_entries = 120
+lambda_entries = 100
 lambda_exits = 100
 
 # lognormal distribution of size of ENTRIES AND EXITS in ETH
