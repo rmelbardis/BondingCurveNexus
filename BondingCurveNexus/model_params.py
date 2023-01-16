@@ -26,6 +26,10 @@ exit_scale = 1
 det_entry_size = 5
 det_exit_size = 5
 
+# Deterministic entry array & exit array - numbers per day
+det_entry_array = np.full(shape=model_days, fill_value=lambda_entries, dtype=int)
+det_exit_array = np.full(shape=model_days, fill_value=lambda_exits, dtype=int)
+
 # number of times the model shifts wnxm price randomly per day
 wnxm_shifts_per_day = 5
 # wnxm price movements (normal distribution of % change per shift)
