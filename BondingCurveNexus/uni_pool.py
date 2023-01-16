@@ -14,7 +14,6 @@ Buying and selling mechanism is a virtual Uni v2 pool with the following feature
  If these printouts are desired, set the parameter to a specific day (defaults to 0)
 '''
 
-from scipy.stats import lognorm
 import numpy as np
 from random import shuffle
 
@@ -190,9 +189,7 @@ class UniPool:
  # daily percentage change in wNXM price
  # represents buys/sells in wnxm market without interacting with platform
     def wnxm_shift(self):
-        self.wnxm_price *= (1 + np.random.normal(loc=model_params.wnxm_drift,
-                                                 scale=model_params.wnxm_diffusion)
-                            )
+        self.wnxm_price *= 1
 
     # WNXM-NXM ARBITRAGE TRANSACTION FUNCTIONS
     def arb_sale_transaction(self):
