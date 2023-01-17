@@ -7,11 +7,10 @@ import numpy as np
 # number of days to run the model for
 model_days = 730
 
-
 #### ---- MARKET PARAMETERS ---- ####
 # mean number of users entering and exiting the system
 # to be modelled by poisson distribution, or used as deterministic number
-lambda_entries = 100
+lambda_entries = 0
 lambda_exits = 100
 
 # lognormal distribution of size of ENTRIES AND EXITS in ETH
@@ -43,11 +42,11 @@ wnxm_diffusion = (1+0.02)**(1/wnxm_shifts_per_day) - 1
 # Based roughly on coingecko +/-2% market depth, which typically hovers around ~$300k,
 # but assuming here that markets will be deeper at higher prices
 # fixed value in order to not be affected by day-to-day market movements
-wnxm_move_size = 5e-07
+wnxm_move_size = 5e-7
 
 # number of times we model the ratchets and liquidity shifting per day
-ratchets_per_day = 100
-liq_moves_per_day = 100
+ratchets_per_day = 10
+liq_moves_per_day = 10
 
 #### ---- NON-MARKET SYSTEM PARAMETERS ---- ####
 # normal distribution of daily % change in active COVER AMOUNT

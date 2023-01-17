@@ -15,7 +15,7 @@ import numpy as np
 from tqdm import tqdm
 
 from BondingCurveNexus import sys_params
-from BondingCurveNexus.uni_det import UniDet
+from BondingCurveNexus.uni_markets_det import UniMarketsDet
 from BondingCurveNexus import model_params
 from BondingCurveNexus.model_params import model_days
 
@@ -100,18 +100,28 @@ def show_graphs():
 if __name__ == "__main__":
 
     # range of variables to test
-    lambda_exits_range = [100, 110, 120, 140, 160, 180, 200]
+    lambda_entries_range = [80, 800]
+    lambda_exits_range = [100, 1000]
+    det_size_range = [5, 0.5]
 
     # create sims and label names for graphs
     sims = []
     label_names = []
 
-    for i in lambda_exits_range:
-        model_params.lambda_exits = i
-        sims.append(UniDet())
-        label_names.append(f'Sell pressure = {i*100/model_params.lambda_entries}% of buy pressure')
+    for i in range(len(lambda_entries_range)):
+        model_params.det_exit_array = np.full(shape=model_days,
+                                              fill_value=lambda_exits_range[i],
+                                              dtype=int)
+        model_params.det_entry_array = np.full(shape=model_days,
+                                        fill_value=lambda_entries_range[i],
+                                        dtype=int)
 
-    for sim in sims:
+        sims.append(UniMarketsDet())
+        label_names.append(f'{lambda_entries_range[i]} entries, {lambda_exits_range[i]} exits per day at {det_size_range[i]} ETH')
+
+    for n, sim in enumerate(sims):
+        model_params.det_entry_size = det_size_range[n]
+        model_params.det_exit_size = det_size_range[n]
         days_run = 0
         for i in tqdm(range(model_days)):
             try:

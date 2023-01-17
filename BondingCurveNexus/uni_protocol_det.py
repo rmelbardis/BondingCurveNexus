@@ -1,9 +1,9 @@
 import numpy as np
 
-from BondingCurveNexus.uni_pool import UniPool
+from BondingCurveNexus.uni_pool_protocol_only import UniPoolProtocol
 from BondingCurveNexus import model_params
 
-class UniDet(UniPool):
+class UniProtocolDet(UniPoolProtocol):
     def __init__(self, daily_printout_day=0):
 
         # initialise all the same stuff as UniPool
@@ -16,7 +16,3 @@ class UniDet(UniPool):
     def nxm_sale_size(self):
         # standard deterministic size of nxm sales
         return model_params.det_exit_size / self.nxm_price()
-
-    def wnxm_shift(self):
-        # no random changes in wNXM price
-        self.wnxm_price *=  1

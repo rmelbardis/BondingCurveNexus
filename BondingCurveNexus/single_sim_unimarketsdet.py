@@ -10,7 +10,7 @@ import numpy as np
 from tqdm import tqdm
 
 from BondingCurveNexus import sys_params
-from BondingCurveNexus.uni_det import UniDet
+from BondingCurveNexus.uni_markets_det import UniMarketsDet
 from BondingCurveNexus.model_params import model_days
 
 
@@ -71,7 +71,7 @@ def show_graphs():
 
 if __name__ == "__main__":
 
-    sim = UniDet()
+    sim = UniMarketsDet()
     days_run = 0
 
     for i in tqdm(range(model_days)):

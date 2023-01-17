@@ -1,10 +1,10 @@
 import numpy as np
 from scipy.stats import lognorm
 
-from BondingCurveNexus.uni_pool import UniPool
+from BondingCurveNexus.uni_pool_markets import UniPoolMarkets
 from BondingCurveNexus import model_params
 
-class UniStoch(UniPool):
+class UniMarketsStoch(UniPoolMarkets):
     def __init__(self, daily_printout_day=0):
 
         # initialise all the same stuff as UniPool

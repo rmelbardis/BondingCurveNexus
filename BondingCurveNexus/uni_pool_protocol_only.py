@@ -1,5 +1,5 @@
 '''
-Define the Buying and Selling Mechanism as a class, in addition to
+Define the Buying and Selling Mechanism as a class (protocol only)
 This allows us to track the different variables as they change over time
 in a consistent manner.
 Buying and selling mechanism is a virtual Uni v2 pool with the following features:
@@ -19,7 +19,7 @@ from random import shuffle
 
 from BondingCurveNexus import sys_params, model_params
 
-class UniPool:
+class UniPoolProtocol:
 
     def __init__(self, daily_printout_day=0):
         # OPENING STATE of system upon initializing a projection instance
@@ -31,11 +31,7 @@ class UniPool:
         self.act_cover = sys_params.act_cover_now
         self.cap_pool = sys_params.cap_pool_now
         self.nxm_supply = sys_params.nxm_supply_now
-        self.wnxm_supply = sys_params.wnxm_supply_now
         self.wnxm_price = sys_params.wnxm_price_now
-
-        # set ETH value for wNXM price shift as a result of 1 ETH of buy/sell
-        self.wnxm_move_size = model_params.wnxm_move_size
 
         # OPENING STATE of virtual uni pool
         # set initial ETH liquidity as initial parameter
@@ -60,15 +56,11 @@ class UniPool:
         self.eth_acquired = 0
         self.nxm_burned = 0
         self.nxm_minted = 0
-        self.wnxm_removed = 0
-        self.wnxm_created = 0
 
         # set tracking lists for individual instance
         self.cap_pool_prediction = [self.cap_pool]
         self.nxm_price_prediction = [self.nxm_price()]
-        self.wnxm_price_prediction = [self.wnxm_price]
         self.nxm_supply_prediction = [self.nxm_supply]
-        self.wnxm_supply_prediction = [self.wnxm_supply]
         self.book_value_prediction = [self.book_value()]
         self.liquidity_nxm_prediction = [self.liquidity_nxm]
         self.liquidity_eth_prediction = [self.liquidity_eth]
@@ -76,8 +68,6 @@ class UniPool:
         self.eth_acquired_prediction = [self.eth_acquired]
         self.nxm_burned_prediction = [self.nxm_burned]
         self.nxm_minted_prediction = [self.nxm_minted]
-        self.wnxm_removed_prediction = [self.wnxm_removed]
-        self.wnxm_created_prediction = [self.wnxm_created]
 
     # INSTANCE FUNCTIONS
     # to calculate a variety of ongoing metrics & parameters
@@ -102,9 +92,9 @@ class UniPool:
     # one platform sale of n_nxm NXM
     def platform_nxm_sale(self, n_nxm):
 
-        # sells disabled above book, so above book user would sell wNXM on open market instead
+        # sells disabled above book, so nothing happens
         if round(self.nxm_price(), 4) > round(self.book_value(), 4):
-            self.wnxm_market_sell(n_wnxm=n_nxm, create=True)
+            pass
 
         else:
             # limit number to total NXM
@@ -130,9 +120,9 @@ class UniPool:
     # one platform buy of n_nxm NXM
     def platform_nxm_buy(self, n_nxm):
 
-        # buys disabled below book, so user would buy wNXM on open market instead
+        # buys disabled below book, so nothing happens
         if round(self.nxm_price(), 4) < round(self.book_value(), 4):
-            self.wnxm_market_buy(n_wnxm=n_nxm, remove=True)
+            pass
 
         else:
             # limit number of single buy to 50% of NXM liquidity to avoid silly results
@@ -153,79 +143,6 @@ class UniPool:
 
             # update ETH liquidity
             self.liquidity_eth = new_eth
-
-    # WNXM MARKET FUNCTIONS
-    def wnxm_market_buy(self, n_wnxm, remove=True):
-        # limit number of wnxm bought to total supply
-        n_wnxm = min(n_wnxm, self.wnxm_supply)
-
-        # crude calc for ETH amount (assuming whole buy happens on opening price)
-        n_eth = n_wnxm * self.wnxm_price
-
-        # increase price depending on defined liquidity parameters
-        self.wnxm_price += n_eth * self.wnxm_move_size
-
-        # if used for arb, remove from supply
-        if remove:
-            self.wnxm_supply -= n_wnxm
-            self.wnxm_removed += n_wnxm
-
-    def wnxm_market_sell(self, n_wnxm, create=True):
-        # limit number of wnxm sold to total supply unless new wnxm is created
-        if not create:
-            n_wnxm = min(n_wnxm, self.wnxm_supply)
-
-        # crude calc for ETH amount (assuming whole sell happens on opening price)
-        n_eth = n_wnxm * self.wnxm_price
-
-        # decrease price depending on defined liquidity parameters
-        self.wnxm_price -= n_eth * self.wnxm_move_size
-
-        # if used for arb, add to supply
-        if create:
-            self.wnxm_supply += n_wnxm
-            self.wnxm_created += n_wnxm
-
- # daily percentage change in wNXM price
- # represents buys/sells in wnxm market without interacting with platform
-    def wnxm_shift(self):
-        self.wnxm_price *= 1
-
-    # WNXM-NXM ARBITRAGE TRANSACTION FUNCTIONS
-    def arb_sale_transaction(self):
-        # establish size of nxm sell, limit to number of nxm supply and wnxm supply
-        num = min(self.nxm_sale_size(), self.wnxm_supply, self.nxm_supply)
-        # buy from open market
-        self.wnxm_market_buy(n_wnxm=num, remove=True)
-        # sell to platform
-        self.platform_nxm_sale(n_nxm=num)
-
-    def arb_buy_transaction(self):
-        # establish size of nxm buy, limit to 50% of nxm liquidity in virtual pool to avoid spikes
-        num = min(self.nxm_sale_size(), self.liquidity_nxm * 0.5)
-        # buy from platform
-        self.platform_nxm_buy(n_nxm=num)
-        # sell to open market
-        self.wnxm_market_sell(n_wnxm=num, create=True)
-
-    def arbitrage(self):
-        # system price > wnxm_price arb
-            # disable sales below book
-            # platform sale price has to be higher than wnxm price for arbitrage
-            # nxm supply has to be greater than zero
-        while  self.nxm_price() <= self.book_value() and \
-        self.nxm_price() > self.wnxm_price and \
-        self.nxm_supply > 0 and self.wnxm_supply > 0:
-            self.arb_sale_transaction()
-
-        # system price < wnxm_price arb
-            # buys disabled below book
-            # platform price has to be lower than wnxm price for arbitrage
-            # nxm supply has to be greater than zero
-        while self.nxm_price() >= self.book_value() and \
-        self.nxm_price() < self.wnxm_price and \
-        self.nxm_supply > 0:
-            self.arb_buy_transaction()
 
     # RATCHET FUNCTIONS
     def ratchet_down(self):
@@ -291,7 +208,6 @@ class UniPool:
         events_today = []
         events_today.extend(['ratchet'] * model_params.ratchets_per_day)
         events_today.extend(['liq_move'] * model_params.liq_moves_per_day)
-        events_today.extend(['wnxm_shift'] * model_params.wnxm_shifts_per_day)
         events_today.extend(['platform_buy'] * self.base_daily_platform_buys[self.current_day])
         events_today.extend(['platform_sale'] * self.base_daily_platform_sales[self.current_day])
         shuffle(events_today)
@@ -303,22 +219,16 @@ class UniPool:
            # if daily_printout_day parameter is non-zero, print pre-arbitrage params
             if self.daily_printout_day:
                 print(f'''Day {self.daily_printout_day} - {event} - pre-arbitrage:
-                        nxm_price = {self.nxm_price()}, wnxm_price = {self.wnxm_price}
-                        book_value = {self.book_value()}, cap_pool = {self.cap_pool},
-                        nxm_supply = {self.nxm_supply}, wnxm_supply = {self.wnxm_supply}
+                        nxm_price = {self.nxm_price()}, book_value = {self.book_value()},
+                        cap_pool = {self.cap_pool}, nxm_supply = {self.nxm_supply}
                 ''')
-
-            #-----WNXM ARBITRAGE-----#
-            # happens in between all events
-            self.arbitrage()
 
            # optional daily printout
            # if daily_printout_day parameter is non-zero, print post-arbitrage params
             if self.daily_printout_day:
                 print(f'''Day {self.daily_printout_day} - {event} - post-arbitrage:
-                        nxm_price = {self.nxm_price()}, wnxm_price = {self.wnxm_price}
-                        book_value = {self.book_value()}, cap_pool = {self.cap_pool},
-                        nxm_supply = {self.nxm_supply}, wnxm_supply = {self.wnxm_supply}
+                        nxm_price = {self.nxm_price()}, book_value = {self.book_value()},
+                        cap_pool = {self.cap_pool}, nxm_supply = {self.nxm_supply}
                 ''')
 
             #-----RATCHET-----#
@@ -340,49 +250,28 @@ class UniPool:
                 if self.liquidity_eth < self.target_liq:
                     self.liq_move(new_liq=self.new_liq(kind='up'))
 
-            #-----WNXM SHIFT-----#
-            if event == 'wnxm_shift':
-                self.wnxm_shift()
-
             #-----PLATFORM BUY-----#
             # not arbitrage-driven
             if event == 'platform_buy':
-                # doesn't happen if wnxm price is below platform price
-                # instead a buy happens of wNXM on open market
-                if self.nxm_price() > self.wnxm_price:
-                    self.wnxm_market_buy(n_wnxm=self.nxm_sale_size(), remove=True)
-
-                # otherwise execute the buy (subject to constraints within instance method)
-                else:
-                    self.platform_nxm_buy(n_nxm=self.nxm_sale_size())
+                self.platform_nxm_buy(n_nxm=self.nxm_sale_size())
 
             #-----PLATFORM SALE-----#
             # not arbitrage-driven
             if event == 'platform_sale':
-                # doesn't happen if wnxm price is above platform price
-                # instead a sell happens of wNXM on open market
-                if self.nxm_price() < self.wnxm_price:
-                    self.wnxm_market_sell(n_wnxm=self.nxm_sale_size(), create=True)
-
-                # otherwise execute the sell (subject to constraints within instance method)
-                else:
-                    self.platform_nxm_sale(n_nxm=self.nxm_sale_size())
+                self.platform_nxm_sale(n_nxm=self.nxm_sale_size())
 
            # optional daily printout
            # if daily_printout_day parameter is non-zero, print post-arbitrage params
             if self.daily_printout_day:
-                print(f'''Day {self.daily_printout_day} - {event} - post-arbitrage:
-                        nxm_price = {self.nxm_price()}, wnxm_price = {self.wnxm_price}
-                        book_value = {self.book_value()}, cap_pool = {self.cap_pool},
-                        nxm_supply = {self.nxm_supply}, wnxm_supply = {self.wnxm_supply}
+                print(f'''Day {self.daily_printout_day} - {event} - post-event:
+                        nxm_price = {self.nxm_price()}, book_value = {self.book_value()},
+                        cap_pool = {self.cap_pool}, nxm_supply = {self.nxm_supply}
                 ''')
 
         # append values to tracking metrics
         self.cap_pool_prediction.append(self.cap_pool)
         self.nxm_price_prediction.append(self.nxm_price())
-        self.wnxm_price_prediction.append(self.wnxm_price)
         self.nxm_supply_prediction.append(self.nxm_supply)
-        self.wnxm_supply_prediction.append(self.wnxm_supply)
         self.book_value_prediction.append(self.book_value())
         self.liquidity_nxm_prediction.append(self.liquidity_nxm)
         self.liquidity_eth_prediction.append(self.liquidity_eth)
@@ -390,8 +279,6 @@ class UniPool:
         self.eth_acquired_prediction.append(self.eth_acquired)
         self.nxm_burned_prediction.append(self.nxm_burned)
         self.nxm_minted_prediction.append(self.nxm_minted)
-        self.wnxm_removed_prediction.append(self.wnxm_removed)
-        self.wnxm_created_prediction.append(self.wnxm_created)
 
         # increment day
         self.current_day += 1
