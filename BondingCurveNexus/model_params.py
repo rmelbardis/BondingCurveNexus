@@ -1,11 +1,11 @@
 '''
-Define fixed modelling parameters for simulation
+Define modelling parameters for simulation
 '''
 
 import numpy as np
 
 # number of days to run the model for
-model_days = 730
+model_days = 365
 
 #### ---- MARKET PARAMETERS ---- ####
 # mean number of users entering and exiting the system

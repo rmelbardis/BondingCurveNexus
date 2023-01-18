@@ -181,10 +181,11 @@ class UniPoolMarkets:
         # decrease price depending on defined liquidity parameters
         self.wnxm_price -= n_eth * self.wnxm_move_size
 
-        # if used for arb, add to supply
+        # if used for arb, add to supply (& limit by nxm supply)
         if create:
-            self.wnxm_supply += n_wnxm
-            self.wnxm_created += n_wnxm
+            old_supply = self.wnxm_supply
+            self.wnxm_supply = min(self.wnxm_supply + n_wnxm, self.nxm_supply)
+            self.wnxm_created += self.wnxm_supply - old_supply
 
  # daily percentage change in wNXM price
  # represents buys/sells in wnxm market without interacting with platform

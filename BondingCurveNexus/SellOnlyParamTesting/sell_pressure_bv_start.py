@@ -16,10 +16,10 @@ from BondingCurveNexus.model_params import model_days
 #-----GRAPHS-----#
 def show_graphs():
     fig, axs = plt.subplots(3, 2, figsize=(15,18)) # axs is a (5,2) nd-array
-    fig.suptitle('''Deterministic Model of sells only - varying ratchet speed per day.
-                 Opening Liq of 25,000 ETH and Target Liq of 2,500 ETH
+    fig.suptitle('''Deterministic Model of sells only - varying number of 5-ETH-exits/day.
+                 Opening Liq of 2,500 ETH and Target Liq of 2,500 ETH
                  4% liquidity movement/day resulting in 100 ETH injection.
-                 Sell pressure = 100 ETH/day''', fontsize=16)
+                 Ratchet speed = 4%/day''', fontsize=16)
     fig.tight_layout(w_pad=2, h_pad=2)
     fig.subplots_adjust(top=0.88)
     # Subplot
@@ -36,6 +36,7 @@ def show_graphs():
     for i in range(len(sims)):
         axs[1, 0].plot(range(days[i]+1), sims[i].book_value_prediction, label=label_names[i])
     axs[1, 0].set_title('book_value')
+    axs[1, 0].set_ylim(top=0.08, bottom=0)
     axs[1, 0].legend()
     # Subplot
     for i in range(len(sims)):
@@ -46,6 +47,7 @@ def show_graphs():
     for i in range(len(sims)):
         axs[2, 0].plot(range(days[i]+1), sims[i].liquidity_nxm_prediction, label=label_names[i])
     axs[2, 0].set_title('liquidity_nxm')
+    axs[2, 0].set_ylim(top=4e5, bottom=0)
     axs[2, 0].legend()
     # Subplot
     for i in range(len(sims)):
@@ -80,21 +82,24 @@ def show_graphs():
 if __name__ == "__main__":
 
     # range of variables to test
-    ratchet_range = [0.01, 0.02, 0.04, 0.06, 0.08, 0.1]
+    lambda_exits_range = [5, 10, 15, 20, 25, 30]
 
     # create sims and label names for graphs
     sims = []
     label_names = []
     days = []
 
-    for speed in ratchet_range:
-        sims.append(UniProtocolDet())
-        label_names.append(f'Ratchet = {speed * 100}%/day')
+    for exits in lambda_exits_range:
+        model_params.det_exit_array = np.full(shape=model_days,
+                                              fill_value=exits,
+                                              dtype=int)
 
-    for n, sim in enumerate(sims):
+        sims.append(UniProtocolDet())
+        label_names.append(f'{exits} exits')
+
+    for sim in sims:
 
         days_run = 0
-        sys_params.ratchet_up_perc = ratchet_range[n]
 
         for i in tqdm(range(model_days)):
             try:

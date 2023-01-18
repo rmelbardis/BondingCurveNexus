@@ -1,33 +1,27 @@
 '''
-Running a set number of single deterministic simulations of the market parameters only:
- - buying from protocol
- - selling to protocol
- - wNXM-NXM arbitrage
+Running a set number of single deterministic simulations of selling only:
 
  The purpose of this type of simulation is to test a range of parameters.
  Deterministic outcomes than then be compared to assess impact of varying this parameter.
-
- CURRENT SET-UP - SELL PRESSURE vs 100 BUYS/DAY
 '''
 
 import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm
 
-from BondingCurveNexus import sys_params
 from BondingCurveNexus.uni_protocol_det import UniProtocolDet
-from BondingCurveNexus.uni_markets_det import UniMarketsDet
-from BondingCurveNexus import model_params
+from BondingCurveNexus import model_params, sys_params
 from BondingCurveNexus.model_params import model_days
 
 #-----GRAPHS-----#
 def show_graphs():
-    fig, axs = plt.subplots(2, 2, figsize=(15,12)) # axs is a (5,2) nd-array
-    fig.suptitle('''Deterministic Model of sells only - varying number of 5-ETH-sells/day.
-                 Target Liq of 2500 ETH and 4% liquidity movement/day resulting in 20 ETH injection.
+    fig, axs = plt.subplots(3, 2, figsize=(15,18)) # axs is a (5,2) nd-array
+    fig.suptitle('''Deterministic Model of sells only - varying number of 5-ETH-exits/day.
+                 Opening Liq of 25,000 ETH and Target Liq of 2,500 ETH
+                 4% liquidity movement/day resulting in 100 ETH injection.
                  Ratchet speed = 4%/day''', fontsize=16)
-    fig.tight_layout()
-    fig.subplots_adjust(top=0.9)
+    fig.tight_layout(w_pad=2, h_pad=2)
+    fig.subplots_adjust(top=0.88)
     # Subplot
     for i in range(len(sims)):
         axs[0, 0].plot(range(days[i]+1), sims[i].nxm_price_prediction, label=label_names[i])
@@ -42,7 +36,7 @@ def show_graphs():
     for i in range(len(sims)):
         axs[1, 0].plot(range(days[i]+1), sims[i].book_value_prediction, label=label_names[i])
     axs[1, 0].set_title('book_value')
-    axs[1, 0].set_ylim(top=0.08)
+    axs[1, 0].set_ylim(top=0.08, bottom=0)
     axs[1, 0].legend()
     # Subplot
     for i in range(len(sims)):
@@ -50,16 +44,17 @@ def show_graphs():
     axs[1, 1].set_title('cap_pool')
     axs[1, 1].legend()
     # Subplot
-    # for i in range(len(sims)):
-    #     axs[2, 0].plot(range(days[i]+1), sims[i].liquidity_nxm_prediction, label=label_names[i])
-    # axs[2, 0].set_title('liquidity_nxm')
-    # axs[2, 0].legend()
-    # # Subplot
-    # for i in range(len(sims)):
-    #     axs[2, 1].plot(range(days[i]+1), sims[i].liquidity_eth_prediction, label=label_names[i])
-    # axs[2, 1].plot(range(days[i]+1), np.full(shape=days[i]+1, fill_value=sys_params.target_liq))
-    # axs[2, 1].set_title('liquidity_eth')
-    # axs[2, 1].legend()
+    for i in range(len(sims)):
+        axs[2, 0].plot(range(days[i]+1), sims[i].liquidity_nxm_prediction, label=label_names[i])
+    axs[2, 0].set_title('liquidity_nxm')
+    axs[2, 0].set_ylim(top=3e6, bottom=0)
+    axs[2, 0].legend()
+    # Subplot
+    for i in range(len(sims)):
+        axs[2, 1].plot(range(days[i]+1), sims[i].liquidity_eth_prediction, label=label_names[i])
+    axs[2, 1].plot(range(days[i]+1), np.full(shape=days[i]+1, fill_value=sys_params.target_liq))
+    axs[2, 1].set_title('liquidity_eth')
+    axs[2, 1].legend()
     # #Subplot
     # for i in range(len(sims)):
     #     axs[3, 0].plot(range(days[i]+1), sims[i].nxm_burned_prediction, label=label_names[i])
