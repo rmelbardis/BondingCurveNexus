@@ -89,7 +89,7 @@ if __name__ == "__main__":
     days = []
 
     for liq in target_liq_range:
-        # sys_params.open_liq = liq
+        sys_params.open_liq = liq
         sys_params.target_liq = liq
         sims.append(UniProtocolDet())
         label_names.append(f'Target ETH Liquidity = {liq}')
