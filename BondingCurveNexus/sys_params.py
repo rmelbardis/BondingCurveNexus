@@ -47,4 +47,4 @@ ratchet_down_perc = 0.04
 
 # liquidity injection speed
 liq_in_perc = 0.04
-liq_out_perc = 0.04
+liq_out_perc = 0.5

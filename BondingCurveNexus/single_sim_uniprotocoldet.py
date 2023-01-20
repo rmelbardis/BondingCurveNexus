@@ -58,7 +58,7 @@ def show_graphs():
 
 if __name__ == "__main__":
 
-    sim = UniProtocolDet()
+    sim = UniProtocolDet(daily_printout_day=52)
     days_run = 0
 
     for i in tqdm(range(model_days)):

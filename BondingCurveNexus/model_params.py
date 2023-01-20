@@ -5,13 +5,16 @@ Define modelling parameters for simulation
 import numpy as np
 
 # number of days to run the model for
-model_days = 730
+model_days = 365*2
 
 #### ---- MARKET PARAMETERS ---- ####
+# multiple of book value where noone is buying NXM anymore
+nxm_book_value_multiple = 3
+
 # mean number of users entering and exiting the system
 # to be modelled by poisson distribution, or used as deterministic number
-lambda_entries = 0
-lambda_exits = 40
+lambda_entries = 100
+lambda_exits = 100
 
 # lognormal distribution of size of ENTRIES AND EXITS in ETH
 # parameterised to median value being ~1 ETH, upper quartile ~3 ETH. Some 1000+ ETH buys/sells

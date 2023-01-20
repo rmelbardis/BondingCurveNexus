@@ -20,7 +20,7 @@ def show_graphs():
     # Destructuring initialization
     fig, axs = plt.subplots(4, 2, figsize=(15,20))
     # set & format title of whole graph system
-    fig.suptitle('One-sided Stochastic Model - 1.2 ratio of buys/sales', fontsize=16)
+    fig.suptitle('Stochastic Market Model - 2:1 ratio of buys/sales', fontsize=16)
     fig.tight_layout()
     fig.subplots_adjust(top=0.95)
 

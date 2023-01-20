@@ -16,16 +16,16 @@ from BondingCurveNexus.model_params import model_days
 #-----GRAPHS-----#
 def show_graphs():
     fig, axs = plt.subplots(3, 2, figsize=(15,18)) # axs is a (5,2) nd-array
-    fig.suptitle('''Deterministic Model of sells only - varying target liquidity.
-                 Opening Liq equal to Target Liq. Ratchet = 4% of Book Value/day
-                 Varied Liquidity movement/day resulting in 100 ETH injection.
-                 Sell pressure = 100 ETH/day''', fontsize=16)
+    fig.suptitle('''Deterministic Model of sells only - varying liquidity injection and sell pressure.
+                 Opening Liq of 25,000 ETH and Target Liq of 2,500 ETH
+                 Ratchet speed = 4%/day''', fontsize=16)
     fig.tight_layout(w_pad=2, h_pad=2)
     fig.subplots_adjust(top=0.88)
     # Subplot
     for i in range(len(sims)):
         axs[0, 0].plot(range(days[i]+1), sims[i].nxm_price_prediction, label=label_names[i])
     axs[0, 0].set_title('nxm_price')
+    axs[0, 0].set_ylim(top=0.05, bottom=0)
     axs[0, 0].legend()
     # Subplot
     for i in range(len(sims)):
@@ -36,6 +36,7 @@ def show_graphs():
     for i in range(len(sims)):
         axs[1, 0].plot(range(days[i]+1), sims[i].book_value_prediction, label=label_names[i])
     axs[1, 0].set_title('book_value')
+    axs[1, 0].set_ylim(top=0.05, bottom=0)
     axs[1, 0].legend()
     # Subplot
     for i in range(len(sims)):
@@ -46,11 +47,12 @@ def show_graphs():
     for i in range(len(sims)):
         axs[2, 0].plot(range(days[i]+1), sims[i].liquidity_nxm_prediction, label=label_names[i])
     axs[2, 0].set_title('liquidity_nxm')
+    axs[2, 0].set_ylim(bottom=0)
     axs[2, 0].legend()
     # Subplot
     for i in range(len(sims)):
         axs[2, 1].plot(range(days[i]+1), sims[i].liquidity_eth_prediction, label=label_names[i])
-    # axs[2, 1].plot(range(days[i]+1), np.full(shape=days[i]+1, fill_value=sys_params.target_liq))
+    axs[2, 1].plot(range(days[i]+1), np.full(shape=days[i]+1, fill_value=sys_params.target_liq))
     axs[2, 1].set_title('liquidity_eth')
     axs[2, 1].legend()
     # #Subplot
@@ -80,19 +82,21 @@ def show_graphs():
 if __name__ == "__main__":
 
     # range of variables to test
-    target_liq_range = [1000, 2500, 5000, 10_000, 20_000]
-    liq_in_range = [0.1, 0.04, 0.02, 0.01, 0.005]
+    lambda_exits_range = [5, 10, 15, 20, 25, 35, 50]
+    liq_in_range = [0.01, 0.02, 0.03, 0.04, 0.05, 0.07, 0.1]
 
     # create sims and label names for graphs
     sims = []
     label_names = []
     days = []
 
-    for liq in target_liq_range:
-        sys_params.open_liq = liq
-        sys_params.target_liq = liq
+    for exits in lambda_exits_range:
+        model_params.det_exit_array = np.full(shape=model_days,
+                                              fill_value=exits,
+                                              dtype=int)
+
         sims.append(UniProtocolDet())
-        label_names.append(f'Target ETH Liquidity = {liq}')
+        label_names.append(f'{exits * model_params.det_exit_size} ETH injected & sold per day')
 
     for n, sim in enumerate(sims):
 

@@ -9,18 +9,20 @@ import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm
 
-from BondingCurveNexus import sys_params
+from BondingCurveNexus import sys_params, model_params
 from BondingCurveNexus.uni_markets_det import UniMarketsDet
 from BondingCurveNexus.model_params import model_days
-
 
 #-----GRAPHS-----#
 def show_graphs():
     # Destructuring initialization
     fig, axs = plt.subplots(4, 2, figsize=(15,20))
-    fig.suptitle('One-sided Stochastic Model - 1 ratio of buys/sales', fontsize=16)
-    fig.tight_layout()
-    fig.subplots_adjust(top=0.95)
+    fig.suptitle('''Deterministic Market Model - varying sell pressure between first 180 days and subsequently.
+                 Open Liq = 25,000, Target Liq = 2500, Ratchet = 4% of Book Value/day
+                 Liquidity movement/day resulting in 100 ETH max injection/removal.
+                 Buy pressure = 100 entries at 5 ETH/day''', fontsize=16)
+    fig.tight_layout(w_pad=2, h_pad=2)
+    fig.subplots_adjust(top=0.88)
 
     # Subplot
     axs[0, 0].plot(range(days_run+1), sim.nxm_price_prediction)
@@ -70,6 +72,12 @@ def show_graphs():
 
 
 if __name__ == "__main__":
+
+    lambda_exits_1_range = [110, 120, 130]
+    lambda_exits_2 = 100
+    model_params.det_exit_array = np.empty((model_days,), dtype=int)
+    model_params.det_exit_array[:180] = lambda_exits_1
+    model_params.det_exit_array[180:] = lambda_exits_2
 
     sim = UniMarketsDet()
     days_run = 0

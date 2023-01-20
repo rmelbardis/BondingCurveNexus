@@ -124,6 +124,10 @@ class UniPoolProtocol:
         if round(self.nxm_price(), 4) < round(self.book_value(), 4):
             pass
 
+        # assume noone buys NXM above 3x book
+        elif self.nxm_price() > self.book_value() * model_params.nxm_book_value_multiple:
+            pass
+
         else:
             # limit number of single buy to 50% of NXM liquidity to avoid silly results
             n_nxm = min(n_nxm, 0.5 * self.liquidity_nxm)
@@ -187,8 +191,8 @@ class UniPoolProtocol:
 
         # downward move
         if kind == 'down':
-            # don't move if below book
-            if self.nxm_price() < self.book_value():
+            # don't move if below or at book
+            if self.nxm_price() <= self.book_value():
                 return self.liquidity_eth
 
         # if above book & above target liq, down to target at daily percentage rate (limit at target)
@@ -217,7 +221,7 @@ class UniPoolProtocol:
 
            # optional daily printout
            # if daily_printout_day parameter is non-zero, print pre-arbitrage params
-            if self.daily_printout_day:
+            if self.daily_printout_day and self.current_day == self.daily_printout_day:
                 print(f'''Day {self.daily_printout_day} - {event} - pre-arbitrage:
                         nxm_price = {self.nxm_price()}, book_value = {self.book_value()},
                         cap_pool = {self.cap_pool}, nxm_supply = {self.nxm_supply}
@@ -225,7 +229,7 @@ class UniPoolProtocol:
 
            # optional daily printout
            # if daily_printout_day parameter is non-zero, print post-arbitrage params
-            if self.daily_printout_day:
+            if self.daily_printout_day and self.current_day == self.daily_printout_day:
                 print(f'''Day {self.daily_printout_day} - {event} - post-arbitrage:
                         nxm_price = {self.nxm_price()}, book_value = {self.book_value()},
                         cap_pool = {self.cap_pool}, nxm_supply = {self.nxm_supply}
@@ -262,7 +266,7 @@ class UniPoolProtocol:
 
            # optional daily printout
            # if daily_printout_day parameter is non-zero, print post-arbitrage params
-            if self.daily_printout_day:
+            if self.daily_printout_day and self.current_day == self.daily_printout_day:
                 print(f'''Day {self.daily_printout_day} - {event} - post-event:
                         nxm_price = {self.nxm_price()}, book_value = {self.book_value()},
                         cap_pool = {self.cap_pool}, nxm_supply = {self.nxm_supply}

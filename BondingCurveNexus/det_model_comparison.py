@@ -10,22 +10,24 @@ import numpy as np
 from tqdm import tqdm
 
 from BondingCurveNexus.uni_protocol_det import UniProtocolDet
+from BondingCurveNexus.uni_markets_det import UniMarketsDet
 from BondingCurveNexus import model_params, sys_params
 from BondingCurveNexus.model_params import model_days
 
 #-----GRAPHS-----#
 def show_graphs():
     fig, axs = plt.subplots(3, 2, figsize=(15,18)) # axs is a (5,2) nd-array
-    fig.suptitle('''Deterministic Model of sells only - varying initial liquidity.
-                 Target Liq of 2,500 ETH. Ratchet = 4% of Book Value/day
-                 4% liquidity movement/day resulting in 100 ETH injection.
-                 Sell pressure = 100 ETH/day''', fontsize=16)
+    fig.suptitle('''Comparison of Protocol-only and Market model, Opening price = wNXM price
+                 100 ETH sell pressure and liq injection per day
+                 Opening Liq = 25,000 Target Liq = 2500
+                 Ratchet speed = 4% of Book Value''', fontsize=16)
     fig.tight_layout(w_pad=2, h_pad=2)
     fig.subplots_adjust(top=0.88)
     # Subplot
     for i in range(len(sims)):
         axs[0, 0].plot(range(days[i]+1), sims[i].nxm_price_prediction, label=label_names[i])
     axs[0, 0].set_title('nxm_price')
+    axs[0, 0].set_ylim(top=0.05, bottom=0)
     axs[0, 0].legend()
     # Subplot
     for i in range(len(sims)):
@@ -36,6 +38,7 @@ def show_graphs():
     for i in range(len(sims)):
         axs[1, 0].plot(range(days[i]+1), sims[i].book_value_prediction, label=label_names[i])
     axs[1, 0].set_title('book_value')
+    axs[1, 0].set_ylim(top=0.05, bottom=0)
     axs[1, 0].legend()
     # Subplot
     for i in range(len(sims)):
@@ -46,6 +49,7 @@ def show_graphs():
     for i in range(len(sims)):
         axs[2, 0].plot(range(days[i]+1), sims[i].liquidity_nxm_prediction, label=label_names[i])
     axs[2, 0].set_title('liquidity_nxm')
+    axs[2, 0].set_ylim(bottom=0)
     axs[2, 0].legend()
     # Subplot
     for i in range(len(sims)):
@@ -79,20 +83,17 @@ def show_graphs():
 
 if __name__ == "__main__":
 
-    # range of variables to test
-    init_liq_range = [1000, 2500, 5000, 10_000, 25_000, 50_000]
-
     # create sims and label names for graphs
     sims = []
     label_names = []
     days = []
 
-    for liq in init_liq_range:
-        sys_params.open_liq = liq
-        sims.append(UniProtocolDet())
-        label_names.append(f'Initial ETH Liquidity = {liq}')
+    sims.append(UniProtocolDet())
+    sims.append(UniMarketsDet())
+    label_names.append(f'Protocol Only')
+    label_names.append(f'Protocol and Markets')
 
-    for n, sim in enumerate(sims):
+    for sim in sims:
 
         days_run = 0
 

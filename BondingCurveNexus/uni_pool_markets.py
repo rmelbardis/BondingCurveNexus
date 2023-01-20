@@ -15,7 +15,7 @@ Buying and selling mechanism is a virtual Uni v2 pool with the following feature
 '''
 
 import numpy as np
-from random import shuffle
+from random import shuffle, choice
 
 from BondingCurveNexus import sys_params, model_params
 
@@ -103,8 +103,8 @@ class UniPoolMarkets:
     def platform_nxm_sale(self, n_nxm):
 
         # sells disabled above book, so above book user would sell wNXM on open market instead
-        if round(self.nxm_price(), 4) > round(self.book_value(), 4):
-            self.wnxm_market_sell(n_wnxm=n_nxm, create=True)
+        if round(self.nxm_price(), 8) > round(self.book_value(), 8):
+            self.wnxm_market_sell(n_wnxm=n_nxm, create=False)
 
         else:
             # limit number to total NXM
@@ -132,7 +132,11 @@ class UniPoolMarkets:
 
         # buys disabled below book, so user would buy wNXM on open market instead
         if round(self.nxm_price(), 4) < round(self.book_value(), 4):
-            self.wnxm_market_buy(n_wnxm=n_nxm, remove=True)
+            self.wnxm_market_buy(n_wnxm=n_nxm, remove=False)
+
+        # assume noone buys NXM above a multiple of book
+        elif self.nxm_price() > self.book_value() * model_params.nxm_book_value_multiple:
+            pass
 
         else:
             # limit number of single buy to 50% of NXM liquidity to avoid silly results
@@ -302,11 +306,12 @@ class UniPoolMarkets:
 
            # optional daily printout
            # if daily_printout_day parameter is non-zero, print pre-arbitrage params
-            if self.daily_printout_day:
+            if self.daily_printout_day and self.current_day == self.daily_printout_day:
                 print(f'''Day {self.daily_printout_day} - {event} - pre-arbitrage:
                         nxm_price = {self.nxm_price()}, wnxm_price = {self.wnxm_price}
                         book_value = {self.book_value()}, cap_pool = {self.cap_pool},
                         nxm_supply = {self.nxm_supply}, wnxm_supply = {self.wnxm_supply}
+                        liquidity_nxm = {self.liquidity_nxm}, liquidity_eth = {self.liquidity_eth}
                 ''')
 
             #-----WNXM ARBITRAGE-----#
@@ -315,11 +320,12 @@ class UniPoolMarkets:
 
            # optional daily printout
            # if daily_printout_day parameter is non-zero, print post-arbitrage params
-            if self.daily_printout_day:
+            if self.daily_printout_day and self.current_day == self.daily_printout_day:
                 print(f'''Day {self.daily_printout_day} - {event} - post-arbitrage:
                         nxm_price = {self.nxm_price()}, wnxm_price = {self.wnxm_price}
                         book_value = {self.book_value()}, cap_pool = {self.cap_pool},
                         nxm_supply = {self.nxm_supply}, wnxm_supply = {self.wnxm_supply}
+                        liquidity_nxm = {self.liquidity_nxm},liquidity_eth = {self.liquidity_eth}
                 ''')
 
             #-----RATCHET-----#
@@ -349,9 +355,9 @@ class UniPoolMarkets:
             # not arbitrage-driven
             if event == 'platform_buy':
                 # doesn't happen if wnxm price is below platform price
-                # instead a buy happens of wNXM on open market
-                if self.nxm_price() > self.wnxm_price:
-                    self.wnxm_market_buy(n_wnxm=self.nxm_sale_size(), remove=True)
+                # instead a buy happens of wNXM on open market, assuming there are wnxm to buy
+                if self.nxm_price() > self.wnxm_price and self.wnxm_supply > 0:
+                    self.wnxm_market_buy(n_wnxm=self.nxm_sale_size(), remove=False)
 
                 # otherwise execute the buy (subject to constraints within instance method)
                 else:
@@ -363,7 +369,7 @@ class UniPoolMarkets:
                 # doesn't happen if wnxm price is above platform price
                 # instead a sell happens of wNXM on open market
                 if self.nxm_price() < self.wnxm_price:
-                    self.wnxm_market_sell(n_wnxm=self.nxm_sale_size(), create=True)
+                    self.wnxm_market_sell(n_wnxm=self.nxm_sale_size(), create=False)
 
                 # otherwise execute the sell (subject to constraints within instance method)
                 else:
@@ -371,11 +377,12 @@ class UniPoolMarkets:
 
            # optional daily printout
            # if daily_printout_day parameter is non-zero, print post-arbitrage params
-            if self.daily_printout_day:
+            if self.daily_printout_day and self.current_day == self.daily_printout_day:
                 print(f'''Day {self.daily_printout_day} - {event} - post-event:
                         nxm_price = {self.nxm_price()}, wnxm_price = {self.wnxm_price}
                         book_value = {self.book_value()}, cap_pool = {self.cap_pool},
                         nxm_supply = {self.nxm_supply}, wnxm_supply = {self.wnxm_supply}
+                        liquidity_nxm = {self.liquidity_nxm},liquidity_eth = {self.liquidity_eth}
                 ''')
 
         # append values to tracking metrics
