@@ -16,7 +16,7 @@ from BondingCurveNexus.model_params import model_days
 #-----GRAPHS-----#
 def show_graphs():
     fig, axs = plt.subplots(3, 2, figsize=(15,18)) # axs is a (5,2) nd-array
-    fig.suptitle('''Deterministic Model of buys only - varying number of 5-ETH-entries/day.
+    fig.suptitle('''Deterministic Model of sells only - varying number of 5-ETH-exits/day.
                  Opening Liq of 2,500 ETH and Target Liq of 2,500 ETH
                  4% liquidity movement/day resulting in 100 ETH injection.
                  Ratchet speed = 4%/day''', fontsize=16)
@@ -26,7 +26,6 @@ def show_graphs():
     for i in range(len(sims)):
         axs[0, 0].plot(range(days[i]+1), sims[i].nxm_price_prediction, label=label_names[i])
     axs[0, 0].set_title('nxm_price')
-    # axs[0, 0].set_ylim(top=0.2, bottom=0)
     axs[0, 0].legend()
     # Subplot
     for i in range(len(sims)):
@@ -37,7 +36,7 @@ def show_graphs():
     for i in range(len(sims)):
         axs[1, 0].plot(range(days[i]+1), sims[i].book_value_prediction, label=label_names[i])
     axs[1, 0].set_title('book_value')
-    # axs[1, 0].set_ylim(top=0.08, bottom=0)
+    axs[1, 0].set_ylim(top=0.08, bottom=0)
     axs[1, 0].legend()
     # Subplot
     for i in range(len(sims)):
@@ -48,7 +47,7 @@ def show_graphs():
     for i in range(len(sims)):
         axs[2, 0].plot(range(days[i]+1), sims[i].liquidity_nxm_prediction, label=label_names[i])
     axs[2, 0].set_title('liquidity_nxm')
-    # axs[2, 0].set_ylim(top=4e5, bottom=0)
+    axs[2, 0].set_ylim(top=4e5, bottom=0)
     axs[2, 0].legend()
     # Subplot
     for i in range(len(sims)):
@@ -83,7 +82,7 @@ def show_graphs():
 if __name__ == "__main__":
 
     # range of variables to test
-    lambda_entry_range = [80, 100, 110]
+    lambda_entry_range = [5, 10, 15, 20, 25, 30]
 
     # create sims and label names for graphs
     sims = []
@@ -95,7 +94,7 @@ if __name__ == "__main__":
                                               fill_value=entries,
                                               dtype=int)
 
-        sims.append(UniProtocolDet(300))
+        sims.append(UniProtocolDet())
         label_names.append(f'{entries} entries')
 
     for sim in sims:
