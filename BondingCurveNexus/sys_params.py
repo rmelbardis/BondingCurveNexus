@@ -38,7 +38,7 @@ capital_factor = 4.8
 # NEW TOKENOMIC PARAMETERS #
 
 # opening and target liquidity in ETH
-open_liq = 2500
+open_liq = 25_000
 target_liq = 2500
 
 # ratchet mechanism speed
