@@ -39,7 +39,7 @@ class UniPoolProtocol:
         # set initial NXM liquidity based on opening wnxm price
         # in practice we can start much lower than wnxm price
         # but for simulation purposes this is the first interesting point
-        self.liquidity_nxm = self.liquidity_eth / self.wnxm_price
+        self.liquidity_nxm = self.liquidity_eth / self.book_value()
         # set initial invariant
         self.invariant = self.liquidity_eth * self.liquidity_nxm
 
@@ -125,8 +125,8 @@ class UniPoolProtocol:
             pass
 
         # assume noone buys NXM above 3x book
-        elif self.nxm_price() > self.book_value() * model_params.nxm_book_value_multiple:
-            pass
+        # elif self.nxm_price() > self.book_value() * model_params.nxm_book_value_multiple:
+        #     pass
 
         else:
             # limit number of single buy to 50% of NXM liquidity to avoid silly results
