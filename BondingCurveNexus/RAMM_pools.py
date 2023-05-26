@@ -1,11 +1,11 @@
 '''
-Define the Buying and Selling RAMM pools as a class (protocol only)
+Define the Buying and Selling Mechanism as a class (protocol only)
 This allows us to track the different variables as they change over time
 in a consistent manner.
-Buying and selling mechanisms are virtual Uni v2 pools with the following features:
+Buying and selling mechanism is a virtual Uni v2 pool with the following features:
  - Price decreases upon sells and increases upon buys from the system
- - Buy pool desabled below book value and sell pool disabled above book value
- - Ratchet mechanism operates to bring the price towards book value from below and above for the two pools
+ - Buys desabled below book value and sells disabled above book value
+ - Ratchet mechanism operates to bring the price towards book value from below and above
  - Liquidity mechanism to bring the pool liquidity towards a target liquidity
 
  Note that this version can't be run by itself as it doesn't specify Stochastic vs Determinstic attributes
@@ -35,16 +35,16 @@ class UniPoolProtocol:
 
         # OPENING STATE of virtual uni pool
         # set initial ETH liquidity as initial parameter
-        self.liquidity_eth = sys_params.target_liq_buy
+        self.liquidity_eth = sys_params.open_liq
         # set initial NXM liquidity based on opening wnxm price
         # in practice we can start much lower than wnxm price
         # but for simulation purposes this is the first interesting point
-        self.liquidity_nxm = self.liquidity_eth / (2 * self.book_value())
+        self.liquidity_nxm = self.liquidity_eth / self.book_value()
         # set initial invariant
         self.invariant = self.liquidity_eth * self.liquidity_nxm
 
         # set target liquidity for the virtual pool in ETH
-        self.target_liq = sys_params.target_liq_buy
+        self.target_liq = sys_params.target_liq
 
         # base entries and exits - set to zero here
         # set stochasically or deterministically in subclasses

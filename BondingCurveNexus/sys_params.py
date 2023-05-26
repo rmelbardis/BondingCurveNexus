@@ -5,8 +5,8 @@ import requests
 
 # NEXUSTRACKER VALUES TODAY - UPDATES REQUIRED REGULARLY #
 # TODO: pull these in automatically
-act_cover_now = 125_280
-cap_pool_now = 145_832
+act_cover_now = 40_579
+cap_pool_now = 144_516
 
 # coingecko price api
 price_url = 'https://api.coingecko.com/api/v3/simple/price'
@@ -38,13 +38,20 @@ capital_factor = 4.8
 # NEW TOKENOMIC PARAMETERS #
 
 # opening and target liquidity in ETH
-open_liq = 25_000
-target_liq = 2500
+# below book/sell pool
+open_liq_sell = 2500
+target_liq_sell = 2500
+# above book/buy pool
+open_liq_buy = 2500
+target_liq_buy = 2500
 
-# ratchet mechanism speed
+# ratchet mechanism speeds
 ratchet_up_perc = 0.04
 ratchet_down_perc = 0.04
 
 # liquidity injection speed
 liq_in_perc = 0.04
-liq_out_perc = 0.03
+liq_out_perc = 0.04
+
+# oracle buffer
+oracle_buffer = 0.01

@@ -16,10 +16,10 @@ from BondingCurveNexus.model_params import model_days
 #-----GRAPHS-----#
 def show_graphs():
     fig, axs = plt.subplots(3, 2, figsize=(15,18)) # axs is a (5,2) nd-array
-    fig.suptitle('''Deterministic Model of buys only - varying number of 5-ETH-entries/day.
-                 Opening Liq of 2,500 ETH and Target Liq of 2,500 ETH
-                 4% liquidity movement/day resulting in 100 ETH injection.
-                 Ratchet speed = 4%/day''', fontsize=16)
+    fig.suptitle(f'''Deterministic Model of buys only - varying ratchet speeds.
+                 Opening Liq of {sys_params.open_liq_buy} ETH and Target Liq of {sys_params.target_liq_buy} ETH
+                 {sys_params.liq_out_perc*100}% liquidity movement/day resulting in max of {sys_params.target_liq_buy*sys_params.liq_out_perc} ETH withdrawal.
+                 {model_params.lambda_entries} {model_params.det_entry_size}-ETH-entries/day resulting in {model_params.det_entry_size * model_params.lambda_entries} ETH/day''', fontsize=16)
     fig.tight_layout(w_pad=2, h_pad=2)
     fig.subplots_adjust(top=0.88)
     # Subplot
@@ -53,7 +53,7 @@ def show_graphs():
     # Subplot
     for i in range(len(sims)):
         axs[2, 1].plot(range(days[i]+1), sims[i].liquidity_eth_prediction, label=label_names[i])
-    axs[2, 1].plot(range(days[i]+1), np.full(shape=days[i]+1, fill_value=sys_params.target_liq))
+    axs[2, 1].plot(range(days[i]+1), np.full(shape=days[i]+1, fill_value=sys_params.target_liq_buy))
     axs[2, 1].set_title('liquidity_eth')
     axs[2, 1].legend()
     # #Subplot
@@ -83,24 +83,23 @@ def show_graphs():
 if __name__ == "__main__":
 
     # range of variables to test
-    lambda_entry_range = [80, 100, 110]
+    ratchet_range = [0.035, 0.04, 0.045]
 
-    # create sims and label names for graphs
+    # create empty lists of sims and label names for graphs
     sims = []
     label_names = []
     days = []
 
-    for entries in lambda_entry_range:
-        model_params.det_entry_array = np.full(shape=model_days,
-                                              fill_value=entries,
-                                              dtype=int)
+    # create sim & label list
+    for speed in ratchet_range:
+        sims.append(UniProtocolDet())
+        label_names.append(f'{speed*100}% of BV/day')
 
-        sims.append(UniProtocolDet(300))
-        label_names.append(f'{entries} entries')
-
-    for sim in sims:
+    # loop through sim list while changing variables
+    for n, sim in enumerate(sims):
 
         days_run = 0
+        sys_params.ratchet_down_perc = ratchet_range[n]
 
         for i in tqdm(range(model_days)):
             try:
