@@ -281,13 +281,13 @@ class UniPoolMarkets:
 
         # if above book & above target liq, down to target at daily percentage rate (limit at target)
         # divided by number of times we're moving liquidity per day
-            return max(self.liquidity_eth - self.target_liq * sys_params.liq_out_perc / model_params.liq_moves_per_day,
+            return max(self.liquidity_eth - self.target_liq * sys_params.liq_out_perc / model_params.ratchets_per_day,
                        self.target_liq)
 
         # if below target liq, up to target at daily percentage rate (limit at target)
         # divided by number of times we're moving liquidity per day
         if kind == 'up':
-            return min(self.liquidity_eth + self.target_liq * sys_params.liq_in_perc / model_params.liq_moves_per_day,
+            return min(self.liquidity_eth + self.target_liq * sys_params.liq_in_perc / model_params.ratchets_per_day,
                        self.target_liq)
 
     # create DAY LOOP
@@ -295,7 +295,7 @@ class UniPoolMarkets:
         # create list of events and shuffle it
         events_today = []
         events_today.extend(['ratchet'] * model_params.ratchets_per_day)
-        events_today.extend(['liq_move'] * model_params.liq_moves_per_day)
+        events_today.extend(['liq_move'] * model_params.ratchets_per_day)
         events_today.extend(['wnxm_shift'] * model_params.wnxm_shifts_per_day)
         events_today.extend(['platform_buy'] * self.base_daily_platform_buys[self.current_day])
         events_today.extend(['platform_sale'] * self.base_daily_platform_sales[self.current_day])

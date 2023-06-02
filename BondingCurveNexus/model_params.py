@@ -5,7 +5,7 @@ Define modelling parameters for simulation
 import numpy as np
 
 # number of days to run the model for
-model_days = 180
+model_days = 730
 
 #### ---- MARKET PARAMETERS ---- ####
 # multiple of book value where noone is buying NXM anymore
@@ -13,8 +13,8 @@ nxm_book_value_multiple = 3
 
 # mean number of users entering and exiting the system
 # to be modelled by poisson distribution, or used as deterministic number
-lambda_entries = 251
-lambda_exits = 0
+lambda_entries = 30
+lambda_exits = 20
 
 # lognormal distribution of size of ENTRIES AND EXITS in ETH
 # parameterised to median value being ~1 ETH, upper quartile ~3 ETH. Some 1000+ ETH buys/sells
@@ -27,8 +27,8 @@ exit_loc = 0
 exit_scale = 1
 
 # Deterministic entry/exit size (rounded up from ~4.3 ETH lognormal mean above)
-det_entry_size = 0.1
-det_exit_size = 0.1
+det_entry_size = 1
+det_exit_size = 1
 
 # Deterministic entry array & exit array - numbers per day
 det_entry_array = np.full(shape=model_days, fill_value=lambda_entries, dtype=int)
@@ -49,7 +49,6 @@ wnxm_move_size = 5e-7
 
 # number of times we model the ratchets and liquidity shifting per day
 ratchets_per_day = 10
-liq_moves_per_day = 10
 
 #### ---- NON-MARKET SYSTEM PARAMETERS ---- ####
 # normal distribution of daily % change in active COVER AMOUNT

@@ -73,12 +73,6 @@ def show_graphs():
 
 if __name__ == "__main__":
 
-    lambda_exits_1_range = [110, 120, 130]
-    lambda_exits_2 = 100
-    model_params.det_exit_array = np.empty((model_days,), dtype=int)
-    model_params.det_exit_array[:180] = lambda_exits_1
-    model_params.det_exit_array[180:] = lambda_exits_2
-
     sim = UniMarketsDet()
     days_run = 0
 

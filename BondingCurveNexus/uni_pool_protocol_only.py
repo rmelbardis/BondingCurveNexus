@@ -35,16 +35,16 @@ class UniPoolProtocol:
 
         # OPENING STATE of virtual uni pool
         # set initial ETH liquidity as initial parameter
-        self.liquidity_eth = sys_params.target_liq_buy
+        self.liquidity_eth = sys_params.open_liq_sell
         # set initial NXM liquidity based on opening wnxm price
         # in practice we can start much lower than wnxm price
         # but for simulation purposes this is the first interesting point
-        self.liquidity_nxm = self.liquidity_eth / (2 * self.book_value())
+        self.liquidity_nxm = self.liquidity_eth / self.wnxm_price
         # set initial invariant
         self.invariant = self.liquidity_eth * self.liquidity_nxm
 
         # set target liquidity for the virtual pool in ETH
-        self.target_liq = sys_params.target_liq_buy
+        self.target_liq = sys_params.target_liq_sell
 
         # base entries and exits - set to zero here
         # set stochasically or deterministically in subclasses
@@ -93,7 +93,7 @@ class UniPoolProtocol:
     def platform_nxm_sale(self, n_nxm):
 
         # sells disabled above book, so nothing happens
-        if round(self.nxm_price(), 4) > round(self.book_value(), 4):
+        if round(self.nxm_price(), 6) > round(self.book_value(), 6):
             pass
 
         else:
@@ -121,7 +121,7 @@ class UniPoolProtocol:
     def platform_nxm_buy(self, n_nxm):
 
         # buys disabled below book, so nothing happens
-        if round(self.nxm_price(), 4) < round(self.book_value(), 4):
+        if round(self.nxm_price(), 6) < round(self.book_value(), 6):
             pass
 
         # assume noone buys NXM above 3x book
@@ -147,6 +147,7 @@ class UniPoolProtocol:
 
             # update ETH liquidity
             self.liquidity_eth = new_eth
+            self.invariant = self.liquidity_eth * self.liquidity_nxm
 
     # RATCHET FUNCTIONS
     def ratchet_down(self):
@@ -197,13 +198,13 @@ class UniPoolProtocol:
 
         # if above book & above target liq, down to target at daily percentage rate (limit at target)
         # divided by number of times we're moving liquidity per day
-            return max(self.liquidity_eth - self.target_liq * sys_params.liq_out_perc / model_params.liq_moves_per_day,
+            return max(self.liquidity_eth - self.target_liq * sys_params.liq_out_perc / model_params.ratchets_per_day,
                        self.target_liq)
 
         # if below target liq, up to target at daily percentage rate (limit at target)
         # divided by number of times we're moving liquidity per day
         if kind == 'up':
-            return min(self.liquidity_eth + self.target_liq * sys_params.liq_in_perc / model_params.liq_moves_per_day,
+            return min(self.liquidity_eth + self.target_liq * sys_params.liq_in_perc / model_params.ratchets_per_day,
                        self.target_liq)
 
     # create DAY LOOP
@@ -211,7 +212,7 @@ class UniPoolProtocol:
         # create list of events and shuffle it
         events_today = []
         events_today.extend(['ratchet'] * model_params.ratchets_per_day)
-        events_today.extend(['liq_move'] * model_params.liq_moves_per_day)
+        events_today.extend(['liq_move'] * model_params.ratchets_per_day)
         events_today.extend(['platform_buy'] * self.base_daily_platform_buys[self.current_day])
         events_today.extend(['platform_sale'] * self.base_daily_platform_sales[self.current_day])
         shuffle(events_today)

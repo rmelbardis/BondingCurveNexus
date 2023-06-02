@@ -4,9 +4,10 @@ This allows us to track the different variables as they change over time
 in a consistent manner.
 Buying and selling mechanisms are virtual Uni v2 pools with the following features:
  - Price decreases upon sells and increases upon buys from the system
- - Buy pool desabled below book value and sell pool disabled above book value
- - Ratchet mechanism operates to bring the price towards book value from below and above for the two pools
+ - Buy pool desabled below target and sell pool disabled above target
+ - Ratchet mechanism operates to bring the price towards target from below and above for the two pools
  - Liquidity mechanism to bring the pool liquidity towards a target liquidity
+ - Target changes over time as buys/sells occur
 
  Note that this version can't be run by itself as it doesn't specify Stochastic vs Determinstic attributes
 
@@ -19,7 +20,7 @@ from random import shuffle
 
 from BondingCurveNexus import sys_params, model_params
 
-class RAMMPools:
+class RAMMMovTarPools:
 
     def __init__(self, daily_printout_day=0):
         # OPENING STATE of system upon initializing a projection instance
@@ -118,41 +119,41 @@ class RAMMPools:
     def platform_nxm_sale(self, n_nxm):
 
         # without wNXM in place, don't do sells if buy price is above book value
-        if round(self.buy_nxm_price(), 4) >\
-            round(self.book_value() * (1 + sys_params.oracle_buffer), 4):
-            pass
+        # if round(self.buy_nxm_price(), 4) >\
+        #     round(self.book_value() * (1 + sys_params.oracle_buffer), 4):
+        #     pass
 
-        else:
-            # limit number to total NXM
-            n_nxm = min(n_nxm, self.nxm_supply)
+        # else:
+        # limit number to total NXM
+        n_nxm = min(n_nxm, self.nxm_supply)
 
-            # add sold NXM to pool
-            self.sell_liquidity_nxm += n_nxm
-            self.nxm_supply -= n_nxm
+        # add sold NXM to pool
+        self.sell_liquidity_nxm += n_nxm
+        self.nxm_supply -= n_nxm
 
-            # establish new value of eth in pool
-            new_eth = self.sell_invariant / self.sell_liquidity_nxm
-            delta_eth = self.sell_liquidity_eth - new_eth
+        # establish new value of eth in pool
+        new_eth = self.sell_invariant / self.sell_liquidity_nxm
+        delta_eth = self.sell_liquidity_eth - new_eth
 
-            # add ETH removed and nxm burned to cumulative total, update capital pool
-            self.eth_sold += delta_eth
-            self.cap_pool -= delta_eth
-            self.nxm_burned += n_nxm
+        # add ETH removed and nxm burned to cumulative total, update capital pool
+        self.eth_sold += delta_eth
+        self.cap_pool -= delta_eth
+        self.nxm_burned += n_nxm
 
-            # update ETH liquidity & invariant
-            self.sell_liquidity_eth = new_eth
-            self.sell_invariant = self.sell_liquidity_eth * self.sell_liquidity_nxm
+        # update ETH liquidity & invariant
+        self.sell_liquidity_eth = new_eth
+        self.sell_invariant = self.sell_liquidity_eth * self.sell_liquidity_nxm
 
     # one platform buy of n_nxm NXM
     def platform_nxm_buy(self, n_nxm):
 
         # without wNXM in place, don't do buys if sell price is below book value
-        if round(self.sell_nxm_price(), 4) <\
-            round(self.book_value() * (1 - sys_params.oracle_buffer), 4):
-            pass
+        # if round(self.sell_nxm_price(), 4) <\
+        #     round(self.book_value() * (1 - sys_params.oracle_buffer), 4):
+        #     pass
 
         # assume noone buys NXM above 3x book
-        elif self.buy_nxm_price() > self.book_value() * model_params.nxm_book_value_multiple:
+        if self.buy_nxm_price() > self.book_value() * model_params.nxm_book_value_multiple:
             pass
 
         else:
@@ -183,13 +184,21 @@ class RAMMPools:
         # establish price movement required to be relevant percentage of BV
         price_movement = self.book_value() * sys_params.ratchet_down_perc / model_params.ratchets_per_day
 
-        # establish target price and cap at book value + oracle buffer
+        # establish target price and cap at sell price + 2 * oracle buffer
         target_price = max(self.buy_nxm_price() - price_movement,
-                           self.book_value() * (1 + sys_params.oracle_buffer))
+                           self.sell_nxm_price() * (1 + 2 * sys_params.oracle_buffer))
+
+        # change target liquidity to be lower when dilutive
+        if self.buy_nxm_price() < self.book_value():
+            self.buy_target_liq = 0.25 * sys_params.target_liq_buy
+        else:
+            self.buy_target_liq = sys_params.target_liq_buy
 
         # find new liquidity by moving down to target at daily percentage rate
         # divided by number of times we're ratcheting per day
         # limit at target
+
+
         if self.buy_liquidity_eth > self.buy_target_liq:
             self.buy_liquidity_eth = max(self.buy_liquidity_eth - self.buy_target_liq * sys_params.liq_out_perc / model_params.ratchets_per_day,
                                     self.buy_target_liq)
@@ -208,9 +217,15 @@ class RAMMPools:
         # establish price movement required to be relevant percentage of BV
         price_movement = self.book_value() * sys_params.ratchet_up_perc / model_params.ratchets_per_day
 
+        # change target liquidity to be lower when dilutive
+        if self.sell_nxm_price() > self.book_value():
+            self.sell_target_liq = 0.25 * sys_params.target_liq_sell
+        else:
+            self.sell_target_liq = sys_params.target_liq_sell
+
         # establish target price and cap at book value - oracle buffer
         target_price = max(self.sell_nxm_price(), min(self.sell_nxm_price() + price_movement,
-                           self.book_value() * (1 - sys_params.oracle_buffer)))
+                           self.buy_nxm_price() * (1 - 2 * sys_params.oracle_buffer)))
 
         # find new liquidity by moving up to target at daily percentage rate
         # divided by number of times we're moving liquidity per day
