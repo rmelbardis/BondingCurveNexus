@@ -6,7 +6,7 @@ from BondingCurveNexus import model_params
 class RAMMMovTarMarketsDet(RAMMMovTarMarkets):
     def __init__(self, daily_printout_day=0):
 
-        # initialise all the same stuff as UniPool
+        # initialise all the same stuff as RAMMMovTarMarkets
         super().__init__(daily_printout_day)
 
         # base entries and exits using a fixed pre-defined array
