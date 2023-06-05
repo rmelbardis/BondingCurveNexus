@@ -18,5 +18,5 @@ class RAMMProtocolDet(RAMMPools):
         return model_params.det_exit_size / self.sell_nxm_price()
 
     def nxm_buy_size(self):
-        # standard deterministic size of nxm sales
+        # standard deterministic size of nxm buys
         return model_params.det_entry_size / self.buy_nxm_price()

@@ -1,12 +1,12 @@
 import numpy as np
 
-from BondingCurveNexus.MovingTarget.RAMM_MovTar_Pools import RAMMMovTarPools
+from BondingCurveNexus.RAMM_markets import RAMMMarkets
 from BondingCurveNexus import model_params
 
-class RAMMMovTarDet(RAMMMovTarPools):
+class RAMMMarketsDet(RAMMMarkets):
     def __init__(self, daily_printout_day=0):
 
-        # initialise all the same stuff as base class
+        # initialise all the same stuff as RAMMMarkets
         super().__init__(daily_printout_day)
 
         # base entries and exits using a fixed pre-defined array
@@ -19,4 +19,8 @@ class RAMMMovTarDet(RAMMMovTarPools):
 
     def nxm_buy_size(self):
         # standard deterministic size of nxm buys
-        return model_params.det_entry_size / self.buy_nxm_price()
+        return model_params.det_exit_size / self.buy_nxm_price()
+
+    def wnxm_shift(self):
+        # no random changes in wNXM price
+        self.wnxm_price *=  1

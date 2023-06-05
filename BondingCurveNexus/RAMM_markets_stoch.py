@@ -1,13 +1,13 @@
 import numpy as np
 from scipy.stats import lognorm
 
-from BondingCurveNexus.MovingTarget.RAMM_MovTar_Markets import RAMMMovTarMarkets
+from BondingCurveNexus.RAMM_markets import RAMMMarkets
 from BondingCurveNexus import model_params
 
-class RAMMMovTarMarketsStoch(RAMMMovTarMarkets):
+class RAMMMarketsStoch(RAMMMarkets):
     def __init__(self, daily_printout_day=0):
 
-        # initialise all the same stuff as RAMMMovTarMarkets
+        # initialise all the same stuff as RAMMMarkets
         super().__init__(daily_printout_day)
 
         # base entries and exits using a poisson distribution
@@ -24,7 +24,7 @@ class RAMMMovTarMarketsStoch(RAMMMovTarMarkets):
                            loc=model_params.exit_loc,
                            scale=model_params.exit_scale) / self.sell_nxm_price()
 
-    def nxm_sale_size(self):
+    def nxm_buy_size(self):
         # lognormal distribution of nxm buys
         return lognorm.rvs(s=model_params.entry_shape,
                            loc=model_params.entry_loc,
