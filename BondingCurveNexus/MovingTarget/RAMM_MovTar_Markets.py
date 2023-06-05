@@ -20,7 +20,7 @@ from random import shuffle
 
 from BondingCurveNexus import sys_params, model_params
 
-class RAMMMovTarPools:
+class RAMMMovTarMarkets:
 
     def __init__(self, daily_printout_day=0):
         # OPENING STATE of system upon initializing a projection instance
