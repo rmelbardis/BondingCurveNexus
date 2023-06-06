@@ -17,12 +17,12 @@ from BondingCurveNexus.model_params import model_days
 def show_graphs():
     # Destructuring initialization
     fig, axs = plt.subplots(6, 2, figsize=(15,27))
-    fig.suptitle(f'''Deterministic Model
+    fig.suptitle(f'''Stochastic Model
                  Opening buy liq of {sys_params.open_liq_buy} ETH and Target buy liq of {sys_params.target_liq_buy} ETH
                  Opening sell liq of {sys_params.open_liq_sell} ETH and Target sell liq of {sys_params.target_liq_sell} ETH
                  {sys_params.liq_out_perc*100}% liquidity movement/day resulting in max of {sys_params.target_liq_buy*sys_params.liq_out_perc} ETH injection/withdrawal.
-                 {initial_daily_entries} ETH Entries Before {initial_days} Days, Afterwards {model_params.lambda_entries} {model_params.det_entry_size}-ETH-entries/day resulting in {model_params.det_entry_size * model_params.lambda_entries} ETH/day
-                 {model_params.lambda_exits} {model_params.det_exit_size}-ETH-exits/day resulting in {model_params.det_exit_size * model_params.lambda_exits} ETH/day
+                 Mean {model_params.lambda_entries} 4.3-ETH-entries/day
+                 Mean {model_params.lambda_exits} 4.3-ETH-exits/day
                  ''',
                  fontsize=16)
     fig.tight_layout()

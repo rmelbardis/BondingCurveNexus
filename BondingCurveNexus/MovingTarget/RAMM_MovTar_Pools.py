@@ -189,10 +189,10 @@ class RAMMMovTarPools:
                            self.sell_nxm_price() * (1 + 2 * sys_params.oracle_buffer))
 
         # change target liquidity to be lower when dilutive
-        if self.buy_nxm_price() < self.book_value():
-            self.buy_target_liq = 0.25 * sys_params.target_liq_buy
-        else:
-            self.buy_target_liq = sys_params.target_liq_buy
+        # if self.buy_nxm_price() < self.book_value():
+        #     self.buy_target_liq = 0.25 * sys_params.target_liq_buy
+        # else:
+        self.buy_target_liq = sys_params.target_liq_buy
 
         # find new liquidity by moving down to target at daily percentage rate
         # divided by number of times we're ratcheting per day
@@ -218,10 +218,10 @@ class RAMMMovTarPools:
         price_movement = self.book_value() * sys_params.ratchet_up_perc / model_params.ratchets_per_day
 
         # change target liquidity to be lower when dilutive
-        if self.sell_nxm_price() > self.book_value():
-            self.sell_target_liq = 0.25 * sys_params.target_liq_sell
-        else:
-            self.sell_target_liq = sys_params.target_liq_sell
+        # if self.sell_nxm_price() > self.book_value():
+        #     self.sell_target_liq = 0.25 * sys_params.target_liq_sell
+        # else:
+        self.sell_target_liq = sys_params.target_liq_sell
 
         # establish target price and cap at book value - oracle buffer
         target_price = max(self.sell_nxm_price(), min(self.sell_nxm_price() + price_movement,

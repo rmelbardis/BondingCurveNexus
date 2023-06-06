@@ -47,7 +47,7 @@ def show_graphs():
     axs[3, 0].set_title('liquidity_nxm')
     # Subplot
     axs[3, 1].plot(range(days_run+1), sim.liquidity_eth_prediction)
-    axs[3, 1].plot(range(days_run+1), np.full(shape=days_run+1, fill_value=sys_params.target_liq))
+    axs[3, 1].plot(range(days_run+1), np.full(shape=days_run+1, fill_value=sys_params.target_liq_sell))
     axs[3, 1].set_title('liquidity_eth')
     # # Subplot
     # axs[4, 0].plot(range(days_run+1), sim.nxm_burned_prediction)

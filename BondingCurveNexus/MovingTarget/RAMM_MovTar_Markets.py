@@ -46,7 +46,8 @@ class RAMMMovTarMarkets:
         # set initial NXM liquidity based on opening wnxm price
         # in practice we can start much lower than wnxm price
         # but for simulation purposes this is the first interesting point
-        self.sell_liquidity_nxm = self.sell_liquidity_eth / self.wnxm_price
+        self.sell_liquidity_nxm = self.sell_liquidity_eth /\
+                                    self.wnxm_price
         # set initial invariant
         self.sell_invariant = self.sell_liquidity_eth * self.sell_liquidity_nxm
         # set target liquidity for the below book pool in ETH
@@ -128,44 +129,31 @@ class RAMMMovTarMarkets:
     # one platform sale of n_nxm NXM
     def platform_nxm_sale(self, n_nxm):
 
-        # with wNXM in place, don't do sells if wNXM price is above platform
-        # assume someone would sell wNXM on open market instead
-        if round(self.sell_nxm_price(), 8) < round(self.wnxm_price, 8):
-            self.wnxm_market_sell(n_wnxm=n_nxm, create=False)
-
-        else:
         # limit number to total NXM
-            n_nxm = min(n_nxm, self.nxm_supply)
+        n_nxm = min(n_nxm, self.nxm_supply)
 
-            # add sold NXM to pool
-            self.sell_liquidity_nxm += n_nxm
-            self.nxm_supply -= n_nxm
+        # add sold NXM to pool
+        self.sell_liquidity_nxm += n_nxm
+        self.nxm_supply -= n_nxm
 
-            # establish new value of eth in pool
-            new_eth = self.sell_invariant / self.sell_liquidity_nxm
-            delta_eth = self.sell_liquidity_eth - new_eth
+        # establish new value of eth in pool
+        new_eth = self.sell_invariant / self.sell_liquidity_nxm
+        delta_eth = self.sell_liquidity_eth - new_eth
 
-            # add ETH removed and nxm burned to cumulative total, update capital pool
-            self.eth_sold += delta_eth
-            self.cap_pool -= delta_eth
-            self.nxm_burned += n_nxm
+        # add ETH removed and nxm burned to cumulative total, update capital pool
+        self.eth_sold += delta_eth
+        self.cap_pool -= delta_eth
+        self.nxm_burned += n_nxm
 
-            # update ETH liquidity & invariant
-            self.sell_liquidity_eth = new_eth
-            self.sell_invariant = self.sell_liquidity_eth * self.sell_liquidity_nxm
+        # update ETH liquidity & invariant
+        self.sell_liquidity_eth = new_eth
+        self.sell_invariant = self.sell_liquidity_eth * self.sell_liquidity_nxm
 
     # one platform buy of n_nxm NXM
     def platform_nxm_buy(self, n_nxm):
 
-        # with wNXM in place, don't do buys if buy price is above wNXM price
-        # assume someone would buy wNXM on open market instead
-        # need wnxm supply to exist
-        if round(self.buy_nxm_price(), 8) > round(self.wnxm_price, 8) and \
-            self.wnxm_supply > 0:
-            self.wnxm_market_buy(n_wnxm=n_nxm, remove=False)
-
         # assume noone buys NXM above a multiple of book
-        elif self.buy_nxm_price() > self.book_value() * model_params.nxm_book_value_multiple:
+        if self.buy_nxm_price() > self.book_value() * model_params.nxm_book_value_multiple:
             pass
 
         else:
@@ -272,10 +260,10 @@ class RAMMMovTarMarkets:
                            self.sell_nxm_price() * (1 + 2 * sys_params.oracle_buffer))
 
         # change target liquidity to be lower when dilutive
-        if self.buy_nxm_price() < self.book_value():
-            self.buy_target_liq = 0.25 * sys_params.target_liq_buy
-        else:
-            self.buy_target_liq = sys_params.target_liq_buy
+        # if self.buy_nxm_price() < self.book_value():
+        #     self.buy_target_liq = 0.25 * sys_params.target_liq_buy
+        # else:
+        self.buy_target_liq = sys_params.target_liq_buy
 
         # find new liquidity by moving down to target at daily percentage rate
         # divided by number of times we're ratcheting per day
@@ -301,10 +289,10 @@ class RAMMMovTarMarkets:
         price_movement = self.book_value() * sys_params.ratchet_up_perc / model_params.ratchets_per_day
 
         # change target liquidity to be lower when dilutive
-        if self.sell_nxm_price() > self.book_value():
-            self.sell_target_liq = 0.25 * sys_params.target_liq_sell
-        else:
-            self.sell_target_liq = sys_params.target_liq_sell
+        # if self.sell_nxm_price() > self.book_value():
+        #     self.sell_target_liq = 0.25 * sys_params.target_liq_sell
+        # else:
+        self.sell_target_liq = sys_params.target_liq_sell
 
         # establish target price and cap at book value - oracle buffer
         target_price = max(self.sell_nxm_price(), min(self.sell_nxm_price() + price_movement,
@@ -341,8 +329,8 @@ class RAMMMovTarMarkets:
             if self.daily_printout_day and self.current_day == self.daily_printout_day:
                 print(f'''Day {self.daily_printout_day} - {event} - pre-arbitrage:
                         sell_nxm_price = {self.sell_nxm_price()}, buy_nxm_price = {self.buy_nxm_price()}
-                        book_value = {self.book_value()},
-                        cap_pool = {self.cap_pool}, nxm_supply = {self.nxm_supply}
+                        book_value = {self.book_value()}, wnxm_price = {self.wnxm_price}
+                        cap_pool = {self.cap_pool}, nxm_supply = {self.nxm_supply}, wnxm_supply = {self.wnxm_supply}
                 ''')
 
             #-----WNXM ARBITRAGE-----#
@@ -354,8 +342,8 @@ class RAMMMovTarMarkets:
             if self.daily_printout_day and self.current_day == self.daily_printout_day:
                 print(f'''Day {self.daily_printout_day} - {event} - post-arbitrage:
                         sell_nxm_price = {self.sell_nxm_price()}, buy_nxm_price = {self.buy_nxm_price()}
-                        book_value = {self.book_value()},
-                        cap_pool = {self.cap_pool}, nxm_supply = {self.nxm_supply}
+                        book_value = {self.book_value()}, wnxm_price = {self.wnxm_price}
+                        cap_pool = {self.cap_pool}, nxm_supply = {self.nxm_supply}, wnxm_supply = {self.wnxm_supply}
                 ''')
 
             #-----RATCHET-----#
@@ -372,20 +360,33 @@ class RAMMMovTarMarkets:
             #-----PLATFORM BUY-----#
             # not arbitrage-driven
             if event == 'platform_buy':
-                self.platform_nxm_buy(n_nxm=self.nxm_buy_size())
+                # with wNXM in place, don't do buys if buy price is above wNXM price
+                # assume someone would buy wNXM on open market instead
+                # need wnxm supply to exist
+                if round(self.buy_nxm_price(), 8) > round(self.wnxm_price, 8)\
+                    and self.wnxm_supply > 0:
+                    self.wnxm_market_buy(n_wnxm=self.nxm_buy_size(), remove=False)
+                else:
+                    self.platform_nxm_buy(n_nxm=self.nxm_buy_size())
 
             #-----PLATFORM SALE-----#
             # not arbitrage-driven
             if event == 'platform_sale':
-                self.platform_nxm_sale(n_nxm=self.nxm_sale_size())
+                 # with wNXM in place, don't do sells if wNXM price is above platform
+                # assume someone would sell wNXM on open market instead
+
+                if round(self.sell_nxm_price(), 8) < round(self.wnxm_price, 8):
+                    self.wnxm_market_sell(n_wnxm=self.nxm_sale_size(), create=False)
+                else:
+                    self.platform_nxm_sale(n_nxm=self.nxm_sale_size())
 
            # optional daily printout
            # if daily_printout_day parameter is non-zero, print post-arbitrage params
             if self.daily_printout_day and self.current_day == self.daily_printout_day:
                 print(f'''Day {self.daily_printout_day} - {event} - post-event:
                         sell_nxm_price = {self.sell_nxm_price()}, buy_nxm_price = {self.buy_nxm_price()}
-                        book_value = {self.book_value()},
-                        cap_pool = {self.cap_pool}, nxm_supply = {self.nxm_supply}
+                        book_value = {self.book_value()}, wnxm_price = {self.wnxm_price}
+                        cap_pool = {self.cap_pool}, nxm_supply = {self.nxm_supply}, wnxm_supply = {self.wnxm_supply}
                 ''')
 
         # append values to tracking metrics

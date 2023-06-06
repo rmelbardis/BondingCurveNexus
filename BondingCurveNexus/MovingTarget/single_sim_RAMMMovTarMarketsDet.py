@@ -21,7 +21,7 @@ def show_graphs():
                  Opening buy liq of {sys_params.open_liq_buy} ETH and Target buy liq of {sys_params.target_liq_buy} ETH
                  Opening sell liq of {sys_params.open_liq_sell} ETH and Target sell liq of {sys_params.target_liq_sell} ETH
                  {sys_params.liq_out_perc*100}% liquidity movement/day resulting in max of {sys_params.target_liq_buy*sys_params.liq_out_perc} ETH injection/withdrawal.
-                 {initial_daily_entries} ETH Entries Before {initial_days} Days, Afterwards {model_params.lambda_entries} {model_params.det_entry_size}-ETH-entries/day resulting in {model_params.det_entry_size * model_params.lambda_entries} ETH/day
+                 {model_params.lambda_entries} {model_params.det_entry_size}-ETH-entries/day resulting in {model_params.det_entry_size * model_params.lambda_entries} ETH/day
                  {model_params.lambda_exits} {model_params.det_exit_size}-ETH-exits/day resulting in {model_params.det_exit_size * model_params.lambda_exits} ETH/day
                  ''',
                  fontsize=16)
@@ -44,6 +44,7 @@ def show_graphs():
     axs[1, 1].plot(range(days_run+1), sim.nxm_supply_prediction, label='nxm')
     axs[1, 1].plot(range(days_run+1), sim.wnxm_supply_prediction, label='wnxm')
     axs[1, 1].set_title('nxm_supply')
+    axs[1, 1].legend()
     # Subplot
     axs[2, 0].plot(range(days_run+1), sim.sell_liquidity_nxm_prediction, label='sell liquidity')
     axs[2, 0].plot(range(days_run+1), sim.buy_liquidity_nxm_prediction, label='buy liquidity')
@@ -79,14 +80,14 @@ def show_graphs():
 
 if __name__ == "__main__":
 
-    initial_days = 30
-    initial_daily_entries = 0
+    # initial_days = 30
+    # initial_daily_entries = 0
 
-    model_params.det_entry_array = np.empty(model_params.model_days, dtype=int)
-    model_params.det_entry_array[:initial_days] = initial_daily_entries
-    model_params.det_entry_array[initial_days:] = model_params.lambda_entries
+    # model_params.det_entry_array = np.empty(model_params.model_days, dtype=int)
+    # model_params.det_entry_array[:initial_days] = initial_daily_entries
+    # model_params.det_entry_array[initial_days:] = model_params.lambda_entries
 
-    sim = RAMMMovTarMarketsDet()
+    sim = RAMMMovTarMarketsDet(daily_printout_day=1)
     days_run = 0
 
     for i in tqdm(range(model_days)):

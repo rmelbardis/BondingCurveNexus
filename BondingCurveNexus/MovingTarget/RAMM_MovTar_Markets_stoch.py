@@ -24,7 +24,7 @@ class RAMMMovTarMarketsStoch(RAMMMovTarMarkets):
                            loc=model_params.exit_loc,
                            scale=model_params.exit_scale) / self.sell_nxm_price()
 
-    def nxm_sale_size(self):
+    def nxm_buy_size(self):
         # lognormal distribution of nxm buys
         return lognorm.rvs(s=model_params.entry_shape,
                            loc=model_params.entry_loc,
