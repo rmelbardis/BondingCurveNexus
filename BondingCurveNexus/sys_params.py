@@ -3,10 +3,10 @@ Define opening & fixed system parameters for simulation
 '''
 import requests
 
-# NEXUSTRACKER VALUES TODAY - UPDATES REQUIRED REGULARLY #
+# DUNE VALUES TODAY - UPDATES REQUIRED REGULARLY #
 # TODO: pull these in automatically
-act_cover_now = 40_579
-cap_pool_now = 144_516
+act_cover_now = 33_430
+cap_pool_now = 20_000
 
 # coingecko price api
 price_url = 'https://api.coingecko.com/api/v3/simple/price'
@@ -55,3 +55,6 @@ liq_out_perc = 0.04
 
 # oracle buffer
 oracle_buffer = 0.01
+
+# Buffers to low capitalisation range
+transition_buffer = target_liq_sell
