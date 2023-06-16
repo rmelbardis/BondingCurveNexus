@@ -6,7 +6,7 @@ import requests
 # DUNE VALUES TODAY - UPDATES REQUIRED REGULARLY #
 # TODO: pull these in automatically
 act_cover_now = 33_430
-cap_pool_now = 20_000
+cap_pool_now = 145_613
 
 # coingecko price api
 price_url = 'https://api.coingecko.com/api/v3/simple/price'
@@ -56,5 +56,12 @@ liq_out_perc = 0.04
 # oracle buffer
 oracle_buffer = 0.01
 
-# Buffers to low capitalisation range
-transition_buffer = target_liq_sell
+# Buffers for low capitalisation range
+# ETH amount on top of MCR + target_liq_sell required for BV as ratchet target
+price_transition_buffer = 2500
+# ETH amount on top of MCR + target_liq_sell + price_transition_buffer
+# where liq_eth_a = liq_eth_b
+liq_transition_end = 1000
+# ETH amount on top of MCR + target_liq_sell + price_transition_buffer + liq_transition_end
+# Where we start moving from separate liquidity parameters to liq_eth_a = liq_eth_b after every trade
+liq_transition_start = 2500

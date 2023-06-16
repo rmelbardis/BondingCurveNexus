@@ -119,7 +119,8 @@ class RAMMHighLowCapMarkets:
     def sell_nxm_price(self):
         return self.sell_liquidity_eth / self.sell_liquidity_nxm
 
-    # calculate nxm price for buys in ETH from virtual RAMM pool
+    # calculate nxm price for buys in ETH fJ@n3L@n3
+    # rom virtual RAMM pool
     def buy_nxm_price(self):
         return self.buy_liquidity_eth / self.buy_liquidity_nxm
 
@@ -138,7 +139,7 @@ class RAMMHighLowCapMarkets:
         return min(1, max(0,
                 (self.cap_pool - (self.mcr() + self.sell_target_liq)) / sys_params.transition_buffer))
 
-    # calculate target for ratchet mechanism based on price_transition ratio
+    # calculate target for ratchet mechanism based on price transition ratio
     def ratchet_target(self):
         return self.price_transition_ratio() * self.book_value() +\
                (1 - self.price_transition_ratio()) * (self.buy_nxm_price() + self.sell_nxm_price()) / 2
