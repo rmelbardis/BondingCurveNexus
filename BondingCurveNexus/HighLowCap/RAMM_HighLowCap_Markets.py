@@ -70,8 +70,8 @@ class RAMMHighLowCapMarkets:
 
         # base entries and exits - set to zero here
         # set stochasically or deterministically in subclasses
-        self.base_daily_platform_buys = np.zeros(shape=model_params.model_days, dtype=int)
-        self.base_daily_platform_sales = np.zeros(shape=model_params.model_days, dtype=int)
+        self.base_daily_protocol_buys = np.zeros(shape=model_params.model_days, dtype=int)
+        self.base_daily_protocol_sales = np.zeros(shape=model_params.model_days, dtype=int)
 
         # initiate and set cumulative counters to zero
         self.eth_sold = 0
@@ -125,7 +125,7 @@ class RAMMHighLowCapMarkets:
         return self.liq_a / self.liq_NXM_a
 
     # function to determine the random sizing of a buy/sell interaction
-    # either with platform or wNXM market
+    # either with protocol or wNXM market
     def nxm_sale_size(self):
         # defined in stoch v det subclasses - can be stochastic or deterministic
         return 0
@@ -134,18 +134,23 @@ class RAMMHighLowCapMarkets:
         # defined in stoch v det subclasses - can be stochastic or deterministic
         return 0
 
+    def liquidity_transition_ratio(self):
+        return min(1, max(0,
+                (self.cap_pool - self.mcr() - self.target_liq_b - sys_params.price_transition_buffer - sys_params.transition_gap) \
+                    / sys_params.liq_transition_buffer))
+
     # calculate current ratio between high & low capitalization functionality
     def price_transition_ratio(self):
         return min(1, max(0,
-                (self.cap_pool - (self.mcr() + self.target_liq_b)) / sys_params.transition_buffer))
+                (self.cap_pool - (self.mcr() + self.target_liq_b)) / sys_params.price_transition_buffer))
 
     # calculate target for ratchet mechanism based on price transition ratio
     def ratchet_target(self):
         return self.price_transition_ratio() * self.book_value() +\
                (1 - self.price_transition_ratio()) * (self.spot_price_a() + self.spot_price_b()) / 2
 
-    # one platform sale of n_nxm NXM
-    def platform_nxm_sale(self, n_nxm):
+    # one protocol sale of n_nxm NXM
+    def protocol_nxm_sale(self, n_nxm):
 
         # limit number to total NXM
         n_nxm = min(n_nxm, self.nxm_supply)
@@ -167,8 +172,8 @@ class RAMMHighLowCapMarkets:
         self.liq_b = new_eth
         self.k_b = self.liq_b * self.liq_NXM_b
 
-    # one platform buy of n_nxm NXM
-    def platform_nxm_buy(self, n_nxm):
+    # one protocol buy of n_nxm NXM
+    def protocol_nxm_buy(self, n_nxm):
 
         # assume noone buys NXM above a multiple of book
         if self.spot_price_a() > self.book_value() * model_params.nxm_book_value_multiple:
@@ -228,7 +233,7 @@ class RAMMHighLowCapMarkets:
             self.wnxm_created += self.wnxm_supply - old_supply
 
  # daily percentage change in wNXM price
- # represents buys/sells in wnxm market without interacting with platform
+ # represents buys/sells in wnxm market without interacting with protocol
     def wnxm_shift(self):
         self.wnxm_price *= 1
 
@@ -238,20 +243,20 @@ class RAMMHighLowCapMarkets:
         num = min(self.nxm_sale_size(), self.wnxm_supply, self.nxm_supply)
         # buy from open market
         self.wnxm_market_buy(n_wnxm=num, remove=True)
-        # sell to platform
-        self.platform_nxm_sale(n_nxm=num)
+        # sell to protocol
+        self.protocol_nxm_sale(n_nxm=num)
 
     def arb_buy_transaction(self):
         # establish size of nxm buy, limit to 50% of nxm liquidity in virtual pool to avoid spikes
         num = min(self.nxm_buy_size(), self.liq_NXM_a * 0.5)
-        # buy from platform
-        self.platform_nxm_buy(n_nxm=num)
+        # buy from protocol
+        self.protocol_nxm_buy(n_nxm=num)
         # sell to open market
         self.wnxm_market_sell(n_wnxm=num, create=True)
 
     def arbitrage(self):
         # system price > wnxm_price arb
-            # platform sale price has to be higher than wnxm price for arbitrage
+            # protocol sale price has to be higher than wnxm price for arbitrage
             # nxm supply has to be greater than zero
         while  self.spot_price_b() > self.wnxm_price and \
                 self.nxm_supply > 0 and self.wnxm_supply > 0:
@@ -259,7 +264,7 @@ class RAMMHighLowCapMarkets:
 
         # system price < wnxm_price arb
             # buys disabled below book
-            # platform price has to be lower than wnxm price for arbitrage
+            # protocol price has to be lower than wnxm price for arbitrage
             # nxm supply has to be greater than zero
         while self.spot_price_a() < self.wnxm_price and \
                 self.nxm_supply > 0:
@@ -333,8 +338,8 @@ class RAMMHighLowCapMarkets:
         events_today = []
         events_today.extend(['ratchet'] * model_params.ratchets_per_day)
         events_today.extend(['wnxm_shift'] * model_params.wnxm_shifts_per_day)
-        events_today.extend(['platform_buy'] * self.base_daily_platform_buys[self.current_day])
-        events_today.extend(['platform_sale'] * self.base_daily_platform_sales[self.current_day])
+        events_today.extend(['protocol_buy'] * self.base_daily_protocol_buys[self.current_day])
+        events_today.extend(['protocol_sale'] * self.base_daily_protocol_sales[self.current_day])
         shuffle(events_today)
 
         # LOOP THROUGH EVENTS OF DAY
@@ -373,9 +378,9 @@ class RAMMHighLowCapMarkets:
             if event == 'wnxm_shift':
                 self.wnxm_shift()
 
-            #-----PLATFORM BUY-----#
+            #-----protocol BUY-----#
             # not arbitrage-driven
-            if event == 'platform_buy':
+            if event == 'protocol_buy':
                 # with wNXM in place, don't do buys if buy price is above wNXM price
                 # assume someone would buy wNXM on open market instead
                 # need wnxm supply to exist
@@ -383,18 +388,18 @@ class RAMMHighLowCapMarkets:
                     and self.wnxm_supply > 0:
                     self.wnxm_market_buy(n_wnxm=self.nxm_buy_size(), remove=False)
                 else:
-                    self.platform_nxm_buy(n_nxm=self.nxm_buy_size())
+                    self.protocol_nxm_buy(n_nxm=self.nxm_buy_size())
 
-            #-----PLATFORM SALE-----#
+            #-----protocol SALE-----#
             # not arbitrage-driven
-            if event == 'platform_sale':
-                 # with wNXM in place, don't do sells if wNXM price is above platform
+            if event == 'protocol_sale':
+                 # with wNXM in place, don't do sells if wNXM price is above protocol
                 # assume someone would sell wNXM on open market instead
 
                 if round(self.spot_price_b(), 8) < round(self.wnxm_price, 8):
                     self.wnxm_market_sell(n_wnxm=self.nxm_sale_size(), create=False)
                 else:
-                    self.platform_nxm_sale(n_nxm=self.nxm_sale_size())
+                    self.protocol_nxm_sale(n_nxm=self.nxm_sale_size())
 
            # optional daily printout
            # if daily_printout_day parameter is non-zero, print post-arbitrage params

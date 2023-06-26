@@ -56,12 +56,12 @@ liq_out_perc = 0.04
 # oracle buffer
 oracle_buffer = 0.01
 
-# Buffers for low capitalisation range
-# ETH amount on top of MCR + target_liq_sell required for BV as ratchet target
+# Zone Parameters for low capitalisation range
+# ETH amount on top of MCR + target_liq_b required for BV as ratchet target
 price_transition_buffer = 2500
-# ETH amount on top of MCR + target_liq_sell + price_transition_buffer
+# ETH amount on top of MCR + target_liq_b + price_transition_buffer
 # where liq_eth_a = liq_eth_b
-liq_transition_end = 1000
-# ETH amount on top of MCR + target_liq_sell + price_transition_buffer + liq_transition_end
+transition_gap = 1000
+# ETH amount on top of MCR + target_liq_b + price_transition_buffer + transition_gap
 # Where we start moving from separate liquidity parameters to liq_eth_a = liq_eth_b after every trade
-liq_transition_start = 2500
+liq_transition_buffer = 2500
