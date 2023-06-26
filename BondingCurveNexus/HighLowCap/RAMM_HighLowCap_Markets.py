@@ -46,27 +46,27 @@ class RAMMHighLowCapMarkets:
 
         # BELOW BOOK
         # set initial ETH liquidity as initial parameter
-        self.sell_liquidity_eth = sys_params.open_liq_sell
+        self.liq_b = sys_params.open_liq_sell
         # set initial NXM liquidity based on opening wnxm price
         # in practice we can start much lower than wnxm price
         # but for simulation purposes this is the first interesting point
-        self.sell_liquidity_nxm = self.sell_liquidity_eth / self.sell_open_price
+        self.liq_NXM_b = self.liq_b / self.sell_open_price
         # set initial invariant
-        self.sell_invariant = self.sell_liquidity_eth * self.sell_liquidity_nxm
+        self.k_b = self.liq_b * self.liq_NXM_b
         # set target liquidity for the below book pool in ETH
-        self.sell_target_liq = sys_params.target_liq_sell
+        self.target_liq_b = sys_params.target_liq_sell
 
         # ABOVE BOOK
         # set initial ETH liquidity as initial parameter
-        self.buy_liquidity_eth = sys_params.open_liq_buy
+        self.liq_a = sys_params.open_liq_buy
         # set initial NXM liquidity based on opening wnxm price
         # in practice we can start much lower than wnxm price
         # but for simulation purposes this is the first interesting point
-        self.buy_liquidity_nxm = self.buy_liquidity_eth / self.buy_open_price
+        self.liq_NXM_a = self.liq_a / self.buy_open_price
         # set initial invariant
-        self.buy_invariant = self.buy_liquidity_eth * self.buy_liquidity_nxm
+        self.k_a = self.liq_a * self.liq_NXM_a
         # set target liquidity for the below book pool in ETH
-        self.buy_target_liq = sys_params.target_liq_buy
+        self.target_liq_a = sys_params.target_liq_buy
 
         # base entries and exits - set to zero here
         # set stochasically or deterministically in subclasses
@@ -83,16 +83,16 @@ class RAMMHighLowCapMarkets:
 
         # set tracking lists for individual instance
         self.cap_pool_prediction = [self.cap_pool]
-        self.sell_nxm_price_prediction = [self.sell_nxm_price()]
-        self.buy_nxm_price_prediction = [self.buy_nxm_price()]
+        self.spot_price_b_prediction = [self.spot_price_b()]
+        self.spot_price_a_prediction = [self.spot_price_a()]
         self.wnxm_price_prediction = [self.wnxm_price]
         self.nxm_supply_prediction = [self.nxm_supply]
         self.wnxm_supply_prediction = [self.wnxm_supply]
         self.book_value_prediction = [self.book_value()]
-        self.sell_liquidity_nxm_prediction = [self.sell_liquidity_nxm]
-        self.sell_liquidity_eth_prediction = [self.sell_liquidity_eth]
-        self.buy_liquidity_nxm_prediction = [self.buy_liquidity_nxm]
-        self.buy_liquidity_eth_prediction = [self.buy_liquidity_eth]
+        self.liq_NXM_b_prediction = [self.liq_NXM_b]
+        self.liq_b_prediction = [self.liq_b]
+        self.liq_NXM_a_prediction = [self.liq_NXM_a]
+        self.liq_a_prediction = [self.liq_a]
         self.eth_sold_prediction = [self.eth_sold]
         self.eth_acquired_prediction = [self.eth_acquired]
         self.nxm_burned_prediction = [self.nxm_burned]
@@ -116,13 +116,13 @@ class RAMMHighLowCapMarkets:
         return self.cap_pool/self.nxm_supply
 
     # calculate nxm price for sells in ETH from virtual RAMM pool
-    def sell_nxm_price(self):
-        return self.sell_liquidity_eth / self.sell_liquidity_nxm
+    def spot_price_b(self):
+        return self.liq_b / self.liq_NXM_b
 
     # calculate nxm price for buys in ETH fJ@n3L@n3
     # rom virtual RAMM pool
-    def buy_nxm_price(self):
-        return self.buy_liquidity_eth / self.buy_liquidity_nxm
+    def spot_price_a(self):
+        return self.liq_a / self.liq_NXM_a
 
     # function to determine the random sizing of a buy/sell interaction
     # either with platform or wNXM market
@@ -137,12 +137,12 @@ class RAMMHighLowCapMarkets:
     # calculate current ratio between high & low capitalization functionality
     def price_transition_ratio(self):
         return min(1, max(0,
-                (self.cap_pool - (self.mcr() + self.sell_target_liq)) / sys_params.transition_buffer))
+                (self.cap_pool - (self.mcr() + self.target_liq_b)) / sys_params.transition_buffer))
 
     # calculate target for ratchet mechanism based on price transition ratio
     def ratchet_target(self):
         return self.price_transition_ratio() * self.book_value() +\
-               (1 - self.price_transition_ratio()) * (self.buy_nxm_price() + self.sell_nxm_price()) / 2
+               (1 - self.price_transition_ratio()) * (self.spot_price_a() + self.spot_price_b()) / 2
 
     # one platform sale of n_nxm NXM
     def platform_nxm_sale(self, n_nxm):
@@ -151,12 +151,12 @@ class RAMMHighLowCapMarkets:
         n_nxm = min(n_nxm, self.nxm_supply)
 
         # add sold NXM to pool
-        self.sell_liquidity_nxm += n_nxm
+        self.liq_NXM_b += n_nxm
         self.nxm_supply -= n_nxm
 
         # establish new value of eth in pool
-        new_eth = self.sell_invariant / self.sell_liquidity_nxm
-        delta_eth = self.sell_liquidity_eth - new_eth
+        new_eth = self.k_b / self.liq_NXM_b
+        delta_eth = self.liq_b - new_eth
 
         # add ETH removed and nxm burned to cumulative total, update capital pool
         self.eth_sold += delta_eth
@@ -164,27 +164,27 @@ class RAMMHighLowCapMarkets:
         self.nxm_burned += n_nxm
 
         # update ETH liquidity & invariant
-        self.sell_liquidity_eth = new_eth
-        self.sell_invariant = self.sell_liquidity_eth * self.sell_liquidity_nxm
+        self.liq_b = new_eth
+        self.k_b = self.liq_b * self.liq_NXM_b
 
     # one platform buy of n_nxm NXM
     def platform_nxm_buy(self, n_nxm):
 
         # assume noone buys NXM above a multiple of book
-        if self.buy_nxm_price() > self.book_value() * model_params.nxm_book_value_multiple:
+        if self.spot_price_a() > self.book_value() * model_params.nxm_book_value_multiple:
             pass
 
         else:
             # limit number of single buy to 50% of NXM liquidity to avoid silly results
-            n_nxm = min(n_nxm, 0.5 * self.buy_liquidity_nxm)
+            n_nxm = min(n_nxm, 0.5 * self.liq_NXM_a)
 
             # remove bought NXM from pool and add actual mint to supply
-            self.buy_liquidity_nxm -= n_nxm
+            self.liq_NXM_a -= n_nxm
             self.nxm_supply += n_nxm
 
             # establish new value of eth in pool
-            new_eth = self.buy_invariant / self.buy_liquidity_nxm
-            delta_eth = new_eth - self.buy_liquidity_eth
+            new_eth = self.k_a / self.liq_NXM_a
+            delta_eth = new_eth - self.liq_a
 
             # add ETH acquired and nxm minted to cumulative total, update capital pool
             self.eth_acquired += delta_eth
@@ -192,7 +192,7 @@ class RAMMHighLowCapMarkets:
             self.nxm_minted += n_nxm
 
             # update ETH liquidity & invariant
-            self.buy_liquidity_eth = new_eth
+            self.liq_a = new_eth
 
     # WNXM MARKET FUNCTIONS
     def wnxm_market_buy(self, n_wnxm, remove=True):
@@ -243,7 +243,7 @@ class RAMMHighLowCapMarkets:
 
     def arb_buy_transaction(self):
         # establish size of nxm buy, limit to 50% of nxm liquidity in virtual pool to avoid spikes
-        num = min(self.nxm_buy_size(), self.buy_liquidity_nxm * 0.5)
+        num = min(self.nxm_buy_size(), self.liq_NXM_a * 0.5)
         # buy from platform
         self.platform_nxm_buy(n_nxm=num)
         # sell to open market
@@ -253,7 +253,7 @@ class RAMMHighLowCapMarkets:
         # system price > wnxm_price arb
             # platform sale price has to be higher than wnxm price for arbitrage
             # nxm supply has to be greater than zero
-        while  self.sell_nxm_price() > self.wnxm_price and \
+        while  self.spot_price_b() > self.wnxm_price and \
                 self.nxm_supply > 0 and self.wnxm_supply > 0:
             self.arb_sale_transaction()
 
@@ -261,7 +261,7 @@ class RAMMHighLowCapMarkets:
             # buys disabled below book
             # platform price has to be lower than wnxm price for arbitrage
             # nxm supply has to be greater than zero
-        while self.buy_nxm_price() < self.wnxm_price and \
+        while self.spot_price_a() < self.wnxm_price and \
                 self.nxm_supply > 0:
             self.arb_buy_transaction()
 
@@ -274,27 +274,27 @@ class RAMMHighLowCapMarkets:
         price_movement = self.ratchet_target() * sys_params.ratchet_down_perc / model_params.ratchets_per_day
 
         # establish target price and cap at target + oracle buffer
-        target_price = max(self.buy_nxm_price() - price_movement,
+        target_price = max(self.spot_price_a() - price_movement,
                            self.ratchet_target() * (1 + sys_params.oracle_buffer))
 
         # change target liquidity to be lower when dilutive
-        # if self.buy_nxm_price() < self.book_value():
-        #     self.buy_target_liq = 0.25 * sys_params.target_liq_buy
+        # if self.spot_price_a() < self.book_value():
+        #     self.target_liq_a = 0.25 * sys_params.target_liq_buy
         # else:
-        # self.buy_target_liq = sys_params.target_liq_buy
+        # self.target_liq_a = sys_params.target_liq_buy
 
         # find new liquidity by moving down to target at daily percentage rate
         # divided by number of times we're ratcheting per day
         # limit at target
-        if self.buy_liquidity_eth > self.buy_target_liq:
-            self.buy_liquidity_eth = max(self.buy_liquidity_eth - self.buy_target_liq * sys_params.liq_out_perc / model_params.ratchets_per_day,
-                                    self.buy_target_liq)
+        if self.liq_a > self.target_liq_a:
+            self.liq_a = max(self.liq_a - self.target_liq_a * sys_params.liq_out_perc / model_params.ratchets_per_day,
+                                    self.target_liq_a)
 
         # update NXM liquidity to reflect new price & new liquidity
-        self.buy_liquidity_nxm = self.buy_liquidity_eth / target_price
+        self.liq_NXM_a = self.liq_a / target_price
 
         # update invariant
-        self.buy_invariant = self.buy_liquidity_eth * self.buy_liquidity_nxm
+        self.k_a = self.liq_a * self.liq_NXM_a
 
 
     def sell_ratchet(self):
@@ -305,27 +305,27 @@ class RAMMHighLowCapMarkets:
         price_movement = self.ratchet_target() * sys_params.ratchet_up_perc / model_params.ratchets_per_day
 
         # change target liquidity to be lower when dilutive
-        # if self.sell_nxm_price() > self.book_value():
-        #     self.sell_target_liq = 0.25 * sys_params.target_liq_sell
+        # if self.spot_price_b() > self.book_value():
+        #     self.target_liq_b = 0.25 * sys_params.target_liq_sell
         # else:
-        # self.sell_target_liq = sys_params.target_liq_sell
+        # self.target_liq_b = sys_params.target_liq_sell
 
         # establish target price and cap at book value - oracle buffer
-        target_price = min(self.sell_nxm_price() + price_movement,
+        target_price = min(self.spot_price_b() + price_movement,
                            self.ratchet_target() * (1 - sys_params.oracle_buffer))
 
         # find new liquidity by moving up to target at daily percentage rate
         # divided by number of times we're moving liquidity per day
         # limit at target
-        if self.sell_liquidity_eth < self.sell_target_liq and self.cap_pool > self.mcr() + self.sell_target_liq:
-            self.sell_liquidity_eth = min(self.sell_liquidity_eth + self.sell_target_liq * sys_params.liq_in_perc / model_params.ratchets_per_day,
-                                    self.sell_target_liq)
+        if self.liq_b < self.target_liq_b and self.cap_pool > self.mcr() + self.target_liq_b:
+            self.liq_b = min(self.liq_b + self.target_liq_b * sys_params.liq_in_perc / model_params.ratchets_per_day,
+                                    self.target_liq_b)
 
         # update NXM liquidity to reflect new price
-        self.sell_liquidity_nxm = self.sell_liquidity_eth / target_price
+        self.liq_NXM_b = self.liq_b / target_price
 
         # update invariant
-        self.sell_invariant = self.sell_liquidity_eth * self.sell_liquidity_nxm
+        self.k_b = self.liq_b * self.liq_NXM_b
 
     # create DAY LOOP
     def one_day_passes(self):
@@ -344,7 +344,7 @@ class RAMMHighLowCapMarkets:
            # if daily_printout_day parameter is non-zero, print pre-arbitrage params
             if self.daily_printout_day and self.current_day == self.daily_printout_day:
                 print(f'''Day {self.daily_printout_day} - {event} - pre-arbitrage:
-                        sell_nxm_price = {self.sell_nxm_price()}, buy_nxm_price = {self.buy_nxm_price()}
+                        spot_price_b = {self.spot_price_b()}, spot_price_a = {self.spot_price_a()}
                         book_value = {self.book_value()}, wnxm_price = {self.wnxm_price}
                         cap_pool = {self.cap_pool}, nxm_supply = {self.nxm_supply}, wnxm_supply = {self.wnxm_supply}
                 ''')
@@ -357,7 +357,7 @@ class RAMMHighLowCapMarkets:
            # if daily_printout_day parameter is non-zero, print post-arbitrage params
             if self.daily_printout_day and self.current_day == self.daily_printout_day:
                 print(f'''Day {self.daily_printout_day} - {event} - post-arbitrage:
-                        sell_nxm_price = {self.sell_nxm_price()}, buy_nxm_price = {self.buy_nxm_price()}
+                        spot_price_b = {self.spot_price_b()}, spot_price_a = {self.spot_price_a()}
                         book_value = {self.book_value()}, wnxm_price = {self.wnxm_price}
                         cap_pool = {self.cap_pool}, nxm_supply = {self.nxm_supply}, wnxm_supply = {self.wnxm_supply}
                 ''')
@@ -379,7 +379,7 @@ class RAMMHighLowCapMarkets:
                 # with wNXM in place, don't do buys if buy price is above wNXM price
                 # assume someone would buy wNXM on open market instead
                 # need wnxm supply to exist
-                if round(self.buy_nxm_price(), 8) > round(self.wnxm_price, 8)\
+                if round(self.spot_price_a(), 8) > round(self.wnxm_price, 8)\
                     and self.wnxm_supply > 0:
                     self.wnxm_market_buy(n_wnxm=self.nxm_buy_size(), remove=False)
                 else:
@@ -391,7 +391,7 @@ class RAMMHighLowCapMarkets:
                  # with wNXM in place, don't do sells if wNXM price is above platform
                 # assume someone would sell wNXM on open market instead
 
-                if round(self.sell_nxm_price(), 8) < round(self.wnxm_price, 8):
+                if round(self.spot_price_b(), 8) < round(self.wnxm_price, 8):
                     self.wnxm_market_sell(n_wnxm=self.nxm_sale_size(), create=False)
                 else:
                     self.platform_nxm_sale(n_nxm=self.nxm_sale_size())
@@ -400,23 +400,23 @@ class RAMMHighLowCapMarkets:
            # if daily_printout_day parameter is non-zero, print post-arbitrage params
             if self.daily_printout_day and self.current_day == self.daily_printout_day:
                 print(f'''Day {self.daily_printout_day} - {event} - post-event:
-                        sell_nxm_price = {self.sell_nxm_price()}, buy_nxm_price = {self.buy_nxm_price()}
+                        spot_price_b = {self.spot_price_b()}, spot_price_a = {self.spot_price_a()}
                         book_value = {self.book_value()}, wnxm_price = {self.wnxm_price}
                         cap_pool = {self.cap_pool}, nxm_supply = {self.nxm_supply}, wnxm_supply = {self.wnxm_supply}
                 ''')
 
         # append values to tracking metrics
         self.cap_pool_prediction.append(self.cap_pool)
-        self.sell_nxm_price_prediction.append(self.sell_nxm_price())
-        self.buy_nxm_price_prediction.append(self.buy_nxm_price())
+        self.spot_price_b_prediction.append(self.spot_price_b())
+        self.spot_price_a_prediction.append(self.spot_price_a())
         self.wnxm_price_prediction.append(self.wnxm_price)
         self.nxm_supply_prediction.append(self.nxm_supply)
         self.wnxm_supply_prediction.append(self.wnxm_supply)
         self.book_value_prediction.append(self.book_value())
-        self.sell_liquidity_nxm_prediction.append(self.sell_liquidity_nxm)
-        self.sell_liquidity_eth_prediction.append(self.sell_liquidity_eth)
-        self.buy_liquidity_nxm_prediction.append(self.buy_liquidity_nxm)
-        self.buy_liquidity_eth_prediction.append(self.buy_liquidity_eth)
+        self.liq_NXM_b_prediction.append(self.liq_NXM_b)
+        self.liq_b_prediction.append(self.liq_b)
+        self.liq_NXM_a_prediction.append(self.liq_NXM_a)
+        self.liq_a_prediction.append(self.liq_a)
         self.eth_sold_prediction.append(self.eth_sold)
         self.eth_acquired_prediction.append(self.eth_acquired)
         self.nxm_burned_prediction.append(self.nxm_burned)
