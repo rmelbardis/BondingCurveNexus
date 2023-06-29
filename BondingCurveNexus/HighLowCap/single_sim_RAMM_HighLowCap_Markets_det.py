@@ -9,7 +9,7 @@ import numpy as np
 from tqdm import tqdm
 
 from BondingCurveNexus import sys_params, model_params
-from BondingCurveNexus.HighLowLiq.RAMM_HighLowCap_Markets_det import RAMMHighLowCapMarketsDet
+from BondingCurveNexus.HighLowCap.RAMM_HighLowCap_Markets_det import RAMMHighLowCapMarketsDet
 from BondingCurveNexus.model_params import model_days
 
 
@@ -29,8 +29,8 @@ def show_graphs():
     fig.subplots_adjust(top=0.92)
 
     # Subplot
-    axs[0, 0].plot(range(days_run+1), sim.sell_nxm_price_prediction, label='sell price')
-    axs[0, 0].plot(range(days_run+1), sim.buy_nxm_price_prediction, label='buy price')
+    axs[0, 0].plot(range(days_run+1), sim.spot_price_b_prediction, label='price below')
+    axs[0, 0].plot(range(days_run+1), sim.spot_price_a_prediction, label='price above')
     axs[0, 0].plot(range(days_run+1), sim.wnxm_price_prediction, label='wnxm price')
     axs[0, 0].set_title('nxm_price')
     axs[0, 0].legend()
@@ -46,13 +46,13 @@ def show_graphs():
     axs[1, 1].set_title('nxm_supply')
     axs[1, 1].legend()
     # Subplot
-    axs[2, 0].plot(range(days_run+1), sim.sell_liquidity_nxm_prediction, label='sell liquidity')
-    axs[2, 0].plot(range(days_run+1), sim.buy_liquidity_nxm_prediction, label='buy liquidity')
+    axs[2, 0].plot(range(days_run+1), sim.liq_NXM_b_prediction, label='NXM reserve below')
+    axs[2, 0].plot(range(days_run+1), sim.liq_NXM_a_prediction, label='NXM reserve above')
     axs[2, 0].set_title('liquidity_nxm')
     axs[2, 0].legend()
     # Subplot
-    axs[2, 1].plot(range(days_run+1), sim.sell_liquidity_eth_prediction, label='sell liquidity')
-    axs[2, 1].plot(range(days_run+1), sim.buy_liquidity_eth_prediction, label='buy liquidity')
+    axs[2, 1].plot(range(days_run+1), sim.liq_b_prediction, label='ETH liquidity below')
+    axs[2, 1].plot(range(days_run+1), sim.liq_a_prediction, label='ETH liquidity above')
     axs[2, 1].plot(range(days_run+1), np.full(shape=days_run+1, fill_value=sys_params.target_liq_sell), label='target')
     axs[2, 1].set_title('liquidity_eth')
     axs[2, 1].legend()
@@ -87,7 +87,7 @@ if __name__ == "__main__":
     # model_params.det_entry_array[:initial_days] = initial_daily_entries
     # model_params.det_entry_array[initial_days:] = model_params.lambda_entries
 
-    sim = RAMMHighLowCapMarketsDet(daily_printout_day=1)
+    sim = RAMMHighLowCapMarketsDet(daily_printout_day=50)
     days_run = 0
 
     for i in tqdm(range(model_days)):

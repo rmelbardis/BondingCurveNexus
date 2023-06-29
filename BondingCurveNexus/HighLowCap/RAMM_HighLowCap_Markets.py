@@ -134,15 +134,17 @@ class RAMMHighLowCapMarkets:
         # defined in stoch v det subclasses - can be stochastic or deterministic
         return 0
 
+    # calculate current ratios between high & low capitalization functionality
+    # liquidity
     def liquidity_transition_ratio(self):
         return min(1, max(0,
                 (self.cap_pool - self.mcr() - self.target_liq_b - sys_params.price_transition_buffer - sys_params.transition_gap) \
                     / sys_params.liq_transition_buffer))
 
-    # calculate current ratio between high & low capitalization functionality
+    # price
     def price_transition_ratio(self):
         return min(1, max(0,
-                (self.cap_pool - (self.mcr() + self.target_liq_b)) / sys_params.price_transition_buffer))
+                (self.cap_pool - self.mcr() - self.target_liq_b) / sys_params.price_transition_buffer))
 
     # calculate target for ratchet mechanism based on price transition ratio
     def ratchet_target(self):

@@ -1,6 +1,6 @@
 import numpy as np
 
-from BondingCurveNexus.HighLowLiq.RAMM_HighLowCap_Markets import RAMMHighLowCapMarkets
+from BondingCurveNexus.HighLowCap.RAMM_HighLowCap_Markets import RAMMHighLowCapMarkets
 from BondingCurveNexus import model_params
 
 class RAMMHighLowCapMarketsDet(RAMMHighLowCapMarkets):
