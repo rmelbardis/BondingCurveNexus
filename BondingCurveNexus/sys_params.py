@@ -6,7 +6,7 @@ import requests
 # DUNE VALUES TODAY - UPDATES REQUIRED REGULARLY #
 # TODO: pull these in automatically
 act_cover_now = 33_430
-cap_pool_now = 145_613
+cap_pool_now = 7_000
 
 # coingecko price api
 price_url = 'https://api.coingecko.com/api/v3/simple/price'

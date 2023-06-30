@@ -31,13 +31,13 @@ class RAMMHighLowCapMarkets:
         # set current state of system
         self.act_cover = sys_params.act_cover_now
         self.cap_pool = sys_params.cap_pool_now
-        self.nxm_supply = 750_000
-        self.wnxm_supply = 500_000
+        self.nxm_supply = sys_params.nxm_supply_now
+        self.wnxm_supply = sys_params.wnxm_supply_now
 
         # set opening prices
-        self.wnxm_price = self.book_value() * 0.5
-        self.sell_open_price = self.book_value() * 0.5 * (1 - sys_params.oracle_buffer)
-        self.buy_open_price = self.book_value() * 0.5 * (1 + sys_params.oracle_buffer)
+        self.wnxm_price = self.book_value()
+        self.sell_open_price = self.book_value() * (1 - sys_params.oracle_buffer)
+        self.buy_open_price = self.book_value() * (1 + sys_params.oracle_buffer)
 
         # set ETH value for wNXM price shift as a result of 1 ETH of buy/sell
         self.wnxm_move_size = model_params.wnxm_move_size
@@ -158,34 +158,22 @@ class RAMMHighLowCapMarkets:
         # limit number to total NXM
         n_nxm = min(n_nxm, self.nxm_supply)
 
-        # if we're in transition, use calculated liquidity based on liq transition ratio
-        # establish pre-transaction ETH liquidity
-        liq_calc = self.liquidity_transition_ratio() * self.liq_b +\
-                    (1 - self.liquidity_transition_ratio()) * min(self.liq_a, self.liq_b)
-        # solve for pre-transaction NXM liquidity and k
-        liq_NXM_calc = liq_calc / self.spot_price_b()
-        k_calc = liq_calc * liq_NXM_calc
+        # add sold NXM to pool
+        self.liq_NXM_b += n_nxm
+        self.nxm_supply -= n_nxm
 
-        # solve for ETH obtained - add sold nxm to calculation liquidity
-        new_NXM = liq_NXM_calc + n_nxm
-        # establish value of ETH obtained
-        new_eth = k_calc / new_NXM
-        delta_eth = liq_calc - new_eth
-        # establish new price
-        new_price = new_eth / new_NXM
-
-        # update pool ETH liquidity
-        self.liq_b -= delta_eth
-        # update pool NXM liquidity
-        self.liq_NXM_b = self.liq_b / new_price
-        # update invariant
-        self.k_b = self.liq_b * self.liq_NXM_b
+        # establish new value of eth in pool
+        new_eth = self.k_b / self.liq_NXM_b
+        delta_eth = self.liq_b - new_eth
 
         # add ETH removed and nxm burned to cumulative total, update capital pool
         self.eth_sold += delta_eth
         self.cap_pool -= delta_eth
         self.nxm_burned += n_nxm
-        self.nxm_supply -= n_nxm
+
+        # update ETH liquidity & invariant
+        self.liq_b = new_eth
+        self.k_b = self.liq_b * self.liq_NXM_b
 
     # one protocol buy of n_nxm NXM
     def protocol_nxm_buy(self, n_nxm):
@@ -198,34 +186,21 @@ class RAMMHighLowCapMarkets:
             # limit number of single buy to 50% of NXM liquidity to avoid silly results
             n_nxm = min(n_nxm, 0.5 * self.liq_NXM_a)
 
-            # if we're in transition, use calculated liquidity based on liq transition ratio
-            # establish pre-transaction ETH liquidity
-            liq_calc = self.liquidity_transition_ratio() * self.liq_a +\
-                        (1 - self.liquidity_transition_ratio()) * min(self.liq_a, self.liq_b)
-            # solve for pre-transaction NXM liquidity and k
-            liq_NXM_calc = liq_calc / self.spot_price_a()
-            k_calc = liq_calc * liq_NXM_calc
+            # remove bought NXM from pool and add actual mint to supply
+            self.liq_NXM_a -= n_nxm
+            self.nxm_supply += n_nxm
 
-            # solve for ETH contributed - remove bought nxm from calculation liquidity
-            new_NXM = liq_NXM_calc - n_nxm
-            # establish value of ETH contributed
-            new_eth = k_calc / new_NXM
-            delta_eth = new_eth - liq_calc
-            # establish new price
-            new_price = new_eth / new_NXM
+            # establish new value of eth in pool
+            new_eth = self.k_a / self.liq_NXM_a
+            delta_eth = new_eth - self.liq_a
 
-            # update pool ETH liquidity
-            self.liq_a += delta_eth
-            # update pool NXM liquidity
-            self.liq_NXM_a = self.liq_a / new_price
-            # update invariant
-            self.k_a = self.liq_a * self.liq_NXM_a
-
-            # add ETH contributed and nxm minted to cumulative total, update capital pool
+            # add ETH acquired and nxm minted to cumulative total, update capital pool
             self.eth_acquired += delta_eth
             self.cap_pool += delta_eth
             self.nxm_minted += n_nxm
-            self.nxm_supply += n_nxm
+
+            # update ETH liquidity & invariant
+            self.liq_a = new_eth
 
     # WNXM MARKET FUNCTIONS
     def wnxm_market_buy(self, n_wnxm, remove=True):

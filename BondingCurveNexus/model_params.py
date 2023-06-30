@@ -5,16 +5,16 @@ Define modelling parameters for simulation
 import numpy as np
 
 # number of days to run the model for
-model_days = 730
+model_days = 50
 
 #### ---- MARKET PARAMETERS ---- ####
 # multiple of book value where noone is buying NXM anymore
-nxm_book_value_multiple = 3
+nxm_book_value_multiple = 5
 
 # mean number of users entering and exiting the system
 # to be modelled by poisson distribution, or used as deterministic number
-lambda_entries = 100
-lambda_exits = 30
+lambda_entries = 10
+lambda_exits = 10
 
 # lognormal distribution of size of ENTRIES AND EXITS in ETH
 # parameterised to median value being ~1 ETH, upper quartile ~3 ETH. Some 1000+ ETH buys/sells
@@ -45,7 +45,7 @@ wnxm_diffusion = (1+0.02)**(1/wnxm_shifts_per_day) - 1
 # Based roughly on coingecko +/-2% market depth, which typically hovers around ~$300k,
 # but assuming here that markets will be deeper at higher prices
 # fixed value in order to not be affected by day-to-day market movements
-wnxm_move_size = 5e-7
+wnxm_move_size = 5e-5
 
 # number of times we model the ratchets and liquidity shifting per day
 ratchets_per_day = 10

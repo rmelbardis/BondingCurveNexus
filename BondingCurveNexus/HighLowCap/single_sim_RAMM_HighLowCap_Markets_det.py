@@ -80,12 +80,12 @@ def show_graphs():
 
 if __name__ == "__main__":
 
-    # initial_days = 30
-    # initial_daily_entries = 0
+    initial_days = 30
+    initial_daily_entries = 0
 
-    # model_params.det_entry_array = np.empty(model_params.model_days, dtype=int)
-    # model_params.det_entry_array[:initial_days] = initial_daily_entries
-    # model_params.det_entry_array[initial_days:] = model_params.lambda_entries
+    model_params.det_entry_array = np.empty(model_params.model_days, dtype=int)
+    model_params.det_entry_array[:initial_days] = initial_daily_entries
+    model_params.det_entry_array[initial_days:] = model_params.lambda_entries
 
     sim = RAMMHighLowCapMarketsDet(daily_printout_day=50)
     days_run = 0
