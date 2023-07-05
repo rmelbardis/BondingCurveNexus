@@ -18,8 +18,7 @@ def show_graphs():
     # Destructuring initialization
     fig, axs = plt.subplots(6, 2, figsize=(15,27))
     fig.suptitle(f'''Deterministic Model
-                 Opening buy liq of {sys_params.open_liq_buy} ETH and Target buy liq of {sys_params.target_liq_buy} ETH
-                 Opening sell liq of {sys_params.open_liq_sell} ETH and Target sell liq of {sys_params.target_liq_sell} ETH
+                 Opening liq of {sys_params.open_liq_sell} ETH and Target liq of {sys_params.target_liq_sell} ETH
                  {sys_params.liq_out_perc*100}% liquidity movement/day resulting in max of {sys_params.target_liq_buy*sys_params.liq_out_perc} ETH injection/withdrawal.
                  {model_params.lambda_entries} {model_params.det_entry_size}-ETH-entries/day resulting in {model_params.det_entry_size * model_params.lambda_entries} ETH/day
                  {model_params.lambda_exits} {model_params.det_exit_size}-ETH-exits/day resulting in {model_params.det_exit_size * model_params.lambda_exits} ETH/day
@@ -51,8 +50,7 @@ def show_graphs():
     axs[2, 0].set_title('liquidity_nxm')
     axs[2, 0].legend()
     # Subplot
-    axs[2, 1].plot(range(days_run+1), sim.liq_b_prediction, label='ETH liquidity below')
-    axs[2, 1].plot(range(days_run+1), sim.liq_a_prediction, label='ETH liquidity above')
+    axs[2, 1].plot(range(days_run+1), sim.liq_prediction, label='ETH liquidity')
     axs[2, 1].plot(range(days_run+1), np.full(shape=days_run+1, fill_value=sys_params.target_liq_sell), label='target')
     axs[2, 1].set_title('liquidity_eth')
     axs[2, 1].legend()

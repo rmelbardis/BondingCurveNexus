@@ -5,8 +5,8 @@ import requests
 
 # DUNE VALUES TODAY - UPDATES REQUIRED REGULARLY #
 # TODO: pull these in automatically
-act_cover_now = 33_430
-cap_pool_now = 7_000
+act_cover_now = 34_090
+cap_pool_now = 145_682
 
 # coingecko price api
 price_url = 'https://api.coingecko.com/api/v3/simple/price'
@@ -38,7 +38,7 @@ capital_factor = 4.8
 # NEW TOKENOMIC PARAMETERS #
 
 # opening and target liquidity in ETH
-# below book/sell pool
+# below book/sell pool (also used for single liquidity)
 open_liq_sell = 2500
 target_liq_sell = 2500
 # above book/buy pool
