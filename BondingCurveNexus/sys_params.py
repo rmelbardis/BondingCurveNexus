@@ -39,11 +39,11 @@ capital_factor = 4.8
 
 # opening and target liquidity in ETH
 # below book/sell pool (also used for single liquidity)
-open_liq_sell = 2500
-target_liq_sell = 2500
+open_liq_sell = 5000
+target_liq_sell = 5000
 # above book/buy pool
-open_liq_buy = 2500
-target_liq_buy = 2500
+open_liq_buy = 5000
+target_liq_buy = 5000
 
 # ratchet mechanism speeds
 ratchet_up_perc = 0.04

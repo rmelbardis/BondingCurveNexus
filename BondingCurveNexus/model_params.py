@@ -13,8 +13,8 @@ nxm_book_value_multiple = 5
 
 # mean number of users entering and exiting the system
 # to be modelled by poisson distribution, or used as deterministic number
-lambda_entries = 1000
-lambda_exits = 50
+lambda_entries = 0
+lambda_exits = 0
 
 # lognormal distribution of size of ENTRIES AND EXITS in ETH
 # parameterised to median value being ~1 ETH, upper quartile ~3 ETH. Some 1000+ ETH buys/sells
