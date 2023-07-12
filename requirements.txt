@@ -18,3 +18,7 @@ requests
 # utils
 ipython
 etherscan-python
+
+# ape
+eth-ape
+ape-foundry

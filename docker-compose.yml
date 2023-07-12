@@ -1,0 +1,22 @@
+version: "3.9"
+
+services:
+
+  jupyter:
+    build:
+      context: .
+      dockerfile: notebook.Dockerfile
+    ports:
+      - 8888:8888
+    environment:
+      WORKDIR: /home/jovyan/work
+    working_dir: /home/jovyan/work
+    volumes:
+      - .:/home/jovyan/work
+
+  foundry:
+    build:
+      context: .
+      dockerfile: foundry.Dockerfile
+    ports:
+      - 8545:8545
