@@ -3,11 +3,10 @@ pip>=9
 setuptools>=26
 twine
 wheel>=0.29
-jupyterlab
 
 # data science
 numpy
-pandas
+pandas<2
 scikit-learn
 matplotlib
 seaborn
