@@ -21,3 +21,4 @@ etherscan-python
 # ape
 eth-ape
 ape-foundry
+ape-solidity
