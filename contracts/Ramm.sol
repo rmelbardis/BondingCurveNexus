@@ -35,8 +35,9 @@ contract Ramm {
   constructor (NXM _nxm, CapitalPool _capitalPool) {
     // middle price: 0.02 ether
     // bv          : 0.0214 ether
-    uint price_a = 0.03 ether;
-    uint price_b = 0.01 ether;
+    // RM: changing these to reflect likely opening params for transition from BC for internal price
+    uint price_a = 0.03566 ether;
+    uint price_b = 0.01418 ether;
 
     eth = 2000 ether;
     targetLiquidity = 2500 ether;
