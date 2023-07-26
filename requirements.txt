@@ -6,10 +6,7 @@ wheel>=0.29
 
 # data science
 numpy
-pandas<2
-scikit-learn
 matplotlib
-seaborn
 
 # api
 requests

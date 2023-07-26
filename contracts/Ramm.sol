@@ -39,8 +39,8 @@ contract Ramm {
     uint price_a = 0.03566 ether;
     uint price_b = 0.01418 ether;
 
-    eth = 2000 ether;
-    targetLiquidity = 2500 ether;
+    eth = 10000 ether;
+    targetLiquidity = 10000 ether;
     lastSwapTimestamp = block.timestamp;
 
     budget = 250 ether;

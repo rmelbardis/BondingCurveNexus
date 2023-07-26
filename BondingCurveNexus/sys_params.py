@@ -5,7 +5,7 @@ import requests
 
 # DUNE VALUES TODAY - UPDATES REQUIRED REGULARLY #
 # TODO: pull these in automatically
-act_cover_now = 34_090
+act_cover_now = 30_104
 cap_pool_now = 145_682
 
 # coingecko price api
@@ -16,6 +16,9 @@ eth_price_params = {
         'vs_currencies': 'usd'
         }
 eth_price_usd = requests.get(price_url, params=eth_price_params).json()['ethereum']['usd']
+
+pool_dai = 5_040_000
+pool_eth = cap_pool_now - (pool_dai / eth_price_usd)
 
 # wnxm price from coingecko api
 wnxm_price_params = {
@@ -34,6 +37,7 @@ nxm_supply_now = requests.get(nxm_supply_url).json()['market_data']['total_suppl
 
 # SYSTEM PARAMETERS - CURRENTLY FIXED BUT MAY BE SUBJECT TO CHANGE #
 capital_factor = 4.8
+mcr_now = act_cover_now / capital_factor
 
 # NEW TOKENOMIC PARAMETERS #
 

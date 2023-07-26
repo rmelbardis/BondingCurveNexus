@@ -13,7 +13,7 @@ RUN npm install -g nodemon
 
 # install python deps
 ADD requirements.txt .
-RUN pip install -r requirements.txt
+RUN pip install -r requirements.txt --use-deprecated=legacy-resolver
 RUN rm requirements.txt
 
 RUN useradd -m ubuntu
