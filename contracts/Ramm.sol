@@ -43,8 +43,8 @@ contract Ramm {
     targetLiquidity = 10000 ether;
     lastSwapTimestamp = block.timestamp;
 
-    budget = 250 ether;
-    aggressiveLiqSpeed = 200 ether;
+    budget = 20000 ether;
+    aggressiveLiqSpeed = 1000 ether;
 
     a.nxm = eth * 1 ether / price_a;
     a.liqSpeed = 100 ether;
