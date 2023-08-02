@@ -36,11 +36,12 @@ def main():
     times = np.array([(datetime.datetime.fromtimestamp(block.timestamp) - datetime.datetime.now()) / datetime.timedelta(days=1)])
 
     # Number of hours to run the simulation for
-    hours = 50
-
+    hours = 1440
     for i in range(hours):
 
         # MOVE TIME
+        print(f'time = {times[-1]}')
+        print(f'liquidity = {liq_prediction[-1]}')
         networks.provider.set_timestamp(block.timestamp + 3600)
         networks.provider.mine()
         block = networks.provider.get_block('latest')
