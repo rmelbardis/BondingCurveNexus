@@ -35,21 +35,26 @@ def main():
     block = networks.provider.get_block('latest')
     times = np.array([(datetime.datetime.fromtimestamp(block.timestamp) - datetime.datetime.now()) / datetime.timedelta(days=1)])
 
-    # Number of hours to run the simulation for
-    hours = 1440
-    for i in range(hours):
+    # Time to run the simulation for
+    quarter_days = 720
+    for i in range(quarter_days):
 
         # MOVE TIME
         print(f'time = {times[-1]}')
         print(f'liquidity = {liq_prediction[-1]}')
-        networks.provider.set_timestamp(block.timestamp + 3600)
+        networks.provider.set_timestamp(block.timestamp + 21_600)
         networks.provider.mine()
         block = networks.provider.get_block('latest')
 
-        # SWAP NXM EVERY HOUR
+        # SWAP NXM EVERY TIME
 
-        nxm_amount = 500
-        ramm.swap(int(nxm_amount * 1e18), sender=dev)
+        # nxm_amount = 3000
+        # ramm.swap(int(nxm_amount * 1e18), sender=dev)
+
+        # SWAP ETH EVERY TIME
+
+        eth_amount = 10
+        ramm.swap(0, value=int(eth_amount * 1e18), sender=dev)
 
         # RECORD METRICS & TIME
 
@@ -67,39 +72,38 @@ def main():
     #-----GRAPHS-----#
     # Destructuring initialization
     fig, axs = plt.subplots(3, 2, figsize=(15,18))
-    fig.suptitle(f'''Deterministic Protocol-only Model
+    fig.suptitle(f'''Deterministic Protocol-only Model, Solidity Contracts
                  Opening liq of {liq_prediction[0]} ETH and Target liq of {liq_prediction[0]} ETH
-                 Initial liquidity movement/day resulting in max of 1000 ETH injection. Withdrawal and long-term injection at 100 ETH/day
-                 500-NXM-exits/hour
+                 Initial high-injection ETH reserve of 0 ETH
+                 Initial liquidity movement/day resulting in max of 1000 ETH injection. Withdrawal and long-term injection at 400 ETH/day
+                 40-ETH-entries/day
                  ''',
                  fontsize=16)
     # fig.tight_layout()
-    fig.subplots_adjust(top=0.92)
+    fig.subplots_adjust(top=0.88)
 
     # Subplot
     axs[0, 0].plot(times, spot_price_b_prediction, label='price below')
     axs[0, 0].plot(times, spot_price_a_prediction, label='price above')
+    axs[0, 0].plot(times, book_value_prediction, label='book value')
     axs[0, 0].set_title('nxm_price')
     axs[0, 0].legend()
     # Subplot
-    axs[0, 1].plot(times, book_value_prediction)
-    axs[0, 1].set_title('book_value')
+    axs[0, 1].plot(times, cap_pool_prediction)
+    axs[0, 1].set_title('cap_pool')
     # Subplot
-    axs[1, 0].plot(times, cap_pool_prediction)
-    axs[1, 0].set_title('cap_pool')
+    axs[1, 0].plot(times, nxm_supply_prediction, label='nxm')
+    axs[1, 0].set_title('nxm_supply')
     # Subplot
-    axs[1, 1].plot(times, nxm_supply_prediction, label='nxm')
-    axs[1, 1].set_title('nxm_supply')
+    axs[1, 1].plot(times, liq_NXM_b_prediction, label='NXM reserve below')
+    axs[1, 1].plot(times, liq_NXM_a_prediction, label='NXM reserve above')
+    axs[1, 1].set_title('liquidity_nxm')
+    axs[1, 1].legend()
     # Subplot
-    axs[2, 0].plot(times, liq_NXM_b_prediction, label='NXM reserve below')
-    axs[2, 0].plot(times, liq_NXM_a_prediction, label='NXM reserve above')
-    axs[2, 0].set_title('liquidity_nxm')
+    axs[2, 0].plot(times, liq_prediction, label='ETH liquidity')
+    axs[2, 0].plot(times, np.full(shape=len(times), fill_value=liq_prediction[0]), label='target')
+    axs[2, 0].set_title('liquidity_eth')
     axs[2, 0].legend()
-    # Subplot
-    axs[2, 1].plot(times, liq_prediction, label='ETH liquidity')
-    axs[2, 1].plot(times, np.full(shape=len(times), fill_value=liq_prediction[0]), label='target')
-    axs[2, 1].set_title('liquidity_eth')
-    axs[2, 1].legend()
 
     fig.savefig('graphs/graph.png')
 

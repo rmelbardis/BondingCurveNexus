@@ -43,11 +43,11 @@ mcr_now = act_cover_now / capital_factor
 
 # opening and target liquidity in ETH
 # below book/sell pool (also used for single liquidity)
-open_liq_sell = 5000
-target_liq_sell = 5000
+open_liq_sell = 10000
+target_liq_sell = 10000
 # above book/buy pool
-open_liq_buy = 5000
-target_liq_buy = 5000
+open_liq_buy = 10000
+target_liq_buy = 10000
 
 # ratchet mechanism speeds
 ratchet_up_perc = 0.04

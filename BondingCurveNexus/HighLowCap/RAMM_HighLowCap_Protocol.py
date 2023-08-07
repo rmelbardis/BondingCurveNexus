@@ -34,8 +34,8 @@ class RAMMHighLowCapProtocol:
         self.nxm_supply = sys_params.nxm_supply_now
 
         # set opening prices
-        self.sell_open_price = sys_params.wnxm_price_now
-        self.buy_open_price = self.book_value() * (1 + sys_params.oracle_buffer)
+        self.sell_open_price = 0.01418
+        self.buy_open_price = 0.03566
 
         # OPENING STATE of RAMM pools
 
@@ -202,9 +202,7 @@ class RAMMHighLowCapProtocol:
         # find new liquidity by moving down to target at daily percentage rate
         # divided by number of times we're ratcheting per day
         # limit at target
-        if self.liq > self.target_liq and\
-           self.spot_price_a() > self.ratchet_target() * (1 + sys_params.oracle_buffer) and\
-           self.spot_price_b() == self.ratchet_target() * (1 - sys_params.oracle_buffer):
+        if self.liq > self.target_liq:
             new_liq = max(self.liq - self.target_liq * sys_params.liq_out_perc / model_params.ratchets_per_day,
                                     self.target_liq)
 
@@ -238,9 +236,7 @@ class RAMMHighLowCapProtocol:
         # find new liquidity by moving up to target at daily percentage rate
         # divided by number of times we're moving liquidity per day
         # limit at target
-        if self.liq < self.target_liq and self.cap_pool > self.mcr() + self.target_liq and\
-           self.spot_price_b() < self.ratchet_target() * (1 - sys_params.oracle_buffer) and\
-           round(self.spot_price_a(), 8) == round(self.ratchet_target() * (1 + sys_params.oracle_buffer), 8):
+        if self.liq < self.target_liq and self.cap_pool > self.mcr() + self.target_liq:
             new_liq = min(self.liq + self.target_liq * sys_params.liq_in_perc / model_params.ratchets_per_day,
                                     self.target_liq)
 

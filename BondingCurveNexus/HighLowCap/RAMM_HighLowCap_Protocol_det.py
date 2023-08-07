@@ -15,7 +15,8 @@ class RAMMHighLowCapProtocolDet(RAMMHighLowCapProtocol):
 
     def nxm_sale_size(self):
         # standard deterministic size of nxm sales
-        return model_params.det_exit_size / self.spot_price_b()
+        # return model_params.det_exit_size / self.spot_price_b()
+        return model_params.det_NXM_exit
 
     def nxm_buy_size(self):
         # standard deterministic size of nxm buys

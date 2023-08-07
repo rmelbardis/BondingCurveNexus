@@ -9,11 +9,11 @@ model_days = 180
 
 #### ---- MARKET PARAMETERS ---- ####
 # multiple of book value where noone is buying NXM anymore
-nxm_book_value_multiple = 5
+nxm_book_value_multiple = 1000
 
 # mean number of users entering and exiting the system
 # to be modelled by poisson distribution, or used as deterministic number
-lambda_entries = 0
+lambda_entries = 4
 lambda_exits = 0
 
 # lognormal distribution of size of ENTRIES AND EXITS in ETH
@@ -27,8 +27,11 @@ exit_loc = 0
 exit_scale = 1
 
 # Deterministic entry/exit size (rounded up from ~4.3 ETH lognormal mean above)
-det_entry_size = 1
+det_entry_size = 10
 det_exit_size = 1
+
+# NXM value exit size
+det_NXM_exit = 3_000
 
 # Deterministic entry array & exit array - numbers per day
 det_entry_array = np.full(shape=model_days, fill_value=lambda_entries, dtype=int)
