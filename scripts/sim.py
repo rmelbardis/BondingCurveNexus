@@ -24,8 +24,8 @@ def main():
 
     # Tracking Metrics
     cap_pool_prediction = np.array([pool.getPoolValueInEth()/1e18])
-    book_value_prediction = np.array([pool.getPoolValueInEth() / nxm.balanceOf(dev)])
     nxm_supply_prediction = np.array([nxm.balanceOf(dev)/1e18])
+    book_value_prediction = np.array([cap_pool_prediction[-1] / nxm_supply_prediction[-1]])
     liq_prediction = np.array([ramm.getReserves()[0]/1e18])
     spot_price_b_prediction = np.array([ramm.getSpotPriceB()/1e18])
     spot_price_a_prediction = np.array([ramm.getSpotPriceA()/1e18])
@@ -36,7 +36,15 @@ def main():
     times = np.array([(datetime.datetime.fromtimestamp(block.timestamp) - datetime.datetime.now()) / datetime.timedelta(days=1)])
 
     # Time to run the simulation for
-    quarter_days = 720
+    quarter_days = 487
+    
+    # NXM total exit force total and per quarter-day assuming they all want to exit within a month
+    initial_nxm_exiting = 675_000
+    remaining_nxm_exiting = initial_nxm_exiting
+    nxm_out_per_qday = initial_nxm_exiting / (4 * 365 / 12)
+    # threshold below which no-one wants to sell
+    bv_threshold = 0.95
+    
     for i in range(quarter_days):
 
         # MOVE TIME
@@ -47,22 +55,25 @@ def main():
         block = networks.provider.get_block('latest')
 
         # SWAP NXM EVERY TIME
-
-        # nxm_amount = 3000
-        # ramm.swap(int(nxm_amount * 1e18), sender=dev)
+        
+        # assume swapping only happens if NXM price > 90% of BV
+        if spot_price_b_prediction[-1] > book_value_prediction[-1] * bv_threshold and \
+            remaining_nxm_exiting > 0: 
+                ramm.swap(int(min(remaining_nxm_exiting, nxm_out_per_qday) * 1e18), sender=dev)
+                remaining_nxm_exiting = max(remaining_nxm_exiting - nxm_out_per_qday, 0)
 
         # SWAP ETH EVERY TIME
 
-        eth_amount = 10
-        ramm.swap(0, value=int(eth_amount * 1e18), sender=dev)
+        # eth_amount = 10
+        # ramm.swap(0, value=int(eth_amount * 1e18), sender=dev)
 
         # RECORD METRICS & TIME
 
         times = np.append(times, [(datetime.datetime.fromtimestamp(block.timestamp) - datetime.datetime.now()) / datetime.timedelta(days=1)])
 
         cap_pool_prediction = np.append(cap_pool_prediction, [pool.getPoolValueInEth()/1e18])
-        book_value_prediction = np.append(book_value_prediction, [pool.getPoolValueInEth() / nxm.balanceOf(dev)])
         nxm_supply_prediction = np.append(nxm_supply_prediction, [nxm.balanceOf(dev)/1e18])
+        book_value_prediction = np.append(book_value_prediction, [cap_pool_prediction[-1] / nxm_supply_prediction[-1]])
         liq_prediction = np.append(liq_prediction, [ramm.getReserves()[0]/1e18])
         spot_price_b_prediction = np.append(spot_price_b_prediction, [ramm.getSpotPriceB()/1e18])
         spot_price_a_prediction = np.append(spot_price_a_prediction, [ramm.getSpotPriceA()/1e18])
@@ -74,9 +85,9 @@ def main():
     fig, axs = plt.subplots(3, 2, figsize=(15,18))
     fig.suptitle(f'''Deterministic Protocol-only Model, Solidity Contracts
                  Opening liq of {liq_prediction[0]} ETH and Target liq of {liq_prediction[0]} ETH
-                 Initial high-injection ETH reserve of 0 ETH
-                 Initial liquidity movement/day resulting in max of 1000 ETH injection. Withdrawal and long-term injection at 400 ETH/day
-                 40-ETH-entries/day
+                 Initial high-injection ETH reserve of 4,600 ETH
+                 Initial liquidity movement/day resulting in max of 1000 ETH injection. Withdrawal and long-term injection at 200 ETH/day
+                 Expecting {initial_nxm_exiting} NXM to want to sell over a 1-month period as long as price is at least {bv_threshold*100}% of BV
                  ''',
                  fontsize=16)
     # fig.tight_layout()
