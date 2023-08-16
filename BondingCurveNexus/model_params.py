@@ -30,8 +30,11 @@ exit_scale = 1
 det_entry_size = 10
 det_exit_size = 1
 
-# NXM value exit size
+# NXM value single exit size
 det_NXM_exit = 3_000
+
+# NXM values for exiting in 1 month - Liq Stage 1
+NXM_exit_values = [675_000, 1_012_500, 1_350_000, 2_025_000, 2_700_000]
 
 # Deterministic entry array & exit array - numbers per day
 det_entry_array = np.full(shape=model_days, fill_value=lambda_entries, dtype=int)

@@ -27,4 +27,4 @@ ENV PATH=${HOME}/.foundry/bin:${HOME}/bin:${PATH}
 RUN curl -sqL https://foundry.paradigm.xyz | bash
 RUN foundryup
 
-CMD nodemon -e py -x ape run sim
+CMD nodemon --watch scripts -e py -x ape run sim

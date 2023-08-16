@@ -6,12 +6,11 @@ import datetime
 import os
 import shutil
 from BondingCurveNexus.sys_params import pool_eth, pool_dai, eth_price_usd, mcr_now, nxm_supply_now
-from BondingCurveNexus.model_params import NXM_exit_values
 
 
 def main():
     
-    run_name = "10,000OpenLiq_4,600ReserveLiq_1,350,000NXMExiting"
+    run_name = "10,000OpenLiq_4,600ReserveLiq_675,000NXMExiting"
     
     ecosystem_name = networks.provider.network.ecosystem.name
     network_name = networks.provider.network.name
@@ -45,7 +44,7 @@ def main():
     quarter_days = 487
     
     # NXM total exit force total and per quarter-day assuming they all want to exit within a month
-    initial_nxm_exiting = NXM_exit_values[2]
+    initial_nxm_exiting = 675_000
     remaining_nxm_exiting = initial_nxm_exiting
     nxm_out_per_qday = initial_nxm_exiting / (4 * 365 / 12)
     # threshold below which no-one wants to sell
@@ -142,7 +141,7 @@ def main():
     print(f'graph copied to {new_graph_file_name}')
     
     # copy script
-    script_dest_dir = src_dir + "/script_archive/EarlySellingSims"
+    script_dest_dir = src_dir + "/scripts/EarlySellingSims"
     script_src_file = os.path.join(src_dir, "scripts", "sim.py")
     # copy the file to destination dir
     shutil.copy(script_src_file , script_dest_dir) 
