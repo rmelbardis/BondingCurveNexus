@@ -6,11 +6,23 @@ import datetime
 import os
 import shutil
 from BondingCurveNexus.sys_params import pool_eth, pool_dai, eth_price_usd, mcr_now, nxm_supply_now
+from BondingCurveNexus.model_params import NXM_exit_values
 
 
 def main():
     
-    run_name = "10,000OpenLiq_4,600ReserveLiq_675,000NXMExiting"
+    run_name = "47_5,000OpenLiq_53,300ReserveLiq_1,012,500NXMExiting"
+    eth_reserve = 53_300
+    
+    # Time to run the simulation for
+    quarter_days = 487
+    
+    # NXM total exit force total and per quarter-day assuming they all want to exit within a month
+    initial_nxm_exiting = NXM_exit_values[1]
+    remaining_nxm_exiting = initial_nxm_exiting
+    nxm_out_per_qday = initial_nxm_exiting / (4 * 365 / 12)
+    # threshold below which no-one wants to sell
+    bv_threshold = 0.95
     
     ecosystem_name = networks.provider.network.ecosystem.name
     network_name = networks.provider.network.name
@@ -36,19 +48,10 @@ def main():
     spot_price_a_prediction = np.array([ramm.getSpotPriceA()/1e18])
     liq_NXM_b_prediction = np.array([ramm.getReserves()[2]/1e18])
     liq_NXM_a_prediction = np.array([ramm.getReserves()[1]/1e18])
+    nxm_exiting_prediction = np.array([remaining_nxm_exiting])
 
     block = networks.provider.get_block('latest')
     times = np.array([(datetime.datetime.fromtimestamp(block.timestamp) - datetime.datetime.now()) / datetime.timedelta(days=1)])
-
-    # Time to run the simulation for
-    quarter_days = 487
-    
-    # NXM total exit force total and per quarter-day assuming they all want to exit within a month
-    initial_nxm_exiting = 675_000
-    remaining_nxm_exiting = initial_nxm_exiting
-    nxm_out_per_qday = initial_nxm_exiting / (4 * 365 / 12)
-    # threshold below which no-one wants to sell
-    bv_threshold = 0.95
     
     for i in range(quarter_days):
 
@@ -83,13 +86,14 @@ def main():
         spot_price_a_prediction = np.append(spot_price_a_prediction, [ramm.getSpotPriceA()/1e18])
         liq_NXM_b_prediction = np.append(liq_NXM_b_prediction, [ramm.getReserves()[2]/1e18])
         liq_NXM_a_prediction = np.append(liq_NXM_a_prediction, [ramm.getReserves()[1]/1e18])
+        nxm_exiting_prediction = np.append(nxm_exiting_prediction, [remaining_nxm_exiting])
 
     #-----GRAPHS-----#
     # Destructuring initialization
     fig, axs = plt.subplots(3, 2, figsize=(15,18))
     fig.suptitle(f'''Deterministic Protocol-only Model, Solidity Contracts
                  Opening liq of {liq_prediction[0]} ETH and Target liq of {liq_prediction[0]} ETH
-                 Initial high-injection ETH reserve of 4,600 ETH
+                 Initial high-injection ETH reserve of {eth_reserve} ETH. Ratchet speed = 10% of BV/day
                  Initial liquidity movement/day resulting in max of 1000 ETH injection. Withdrawal and long-term injection at 200 ETH/day
                  Expecting {initial_nxm_exiting} NXM to want to sell over a 1-month period as long as price is at least {bv_threshold*100}% of BV
                  ''',
@@ -119,6 +123,9 @@ def main():
     axs[2, 0].plot(times, np.full(shape=len(times), fill_value=liq_prediction[0]), label='target')
     axs[2, 0].set_title('liquidity_eth')
     axs[2, 0].legend()
+    # Subplot
+    axs[2, 1].plot(times, nxm_exiting_prediction)
+    axs[2, 1].set_title('nxm_exiting')
 
     fig.savefig('graphs/graph.png')
 
@@ -141,7 +148,7 @@ def main():
     print(f'graph copied to {new_graph_file_name}')
     
     # copy script
-    script_dest_dir = src_dir + "/scripts/EarlySellingSims"
+    script_dest_dir = src_dir + "/script_archive/EarlySellingSims"
     script_src_file = os.path.join(src_dir, "scripts", "sim.py")
     # copy the file to destination dir
     shutil.copy(script_src_file , script_dest_dir) 

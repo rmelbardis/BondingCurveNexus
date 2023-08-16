@@ -11,14 +11,14 @@ from BondingCurveNexus.model_params import NXM_exit_values
 
 def main():
     
-    run_name = "50_5,000OpenLiq_53,300ReserveLiq_2,700,000NXMExiting"
-    eth_reserve = 53_300
+    run_name = "36_5,000OpenLiq_24,150ReserveLiq_675,000NXMExiting"
+    eth_reserve = 24_150
     
     # Time to run the simulation for
     quarter_days = 487
     
     # NXM total exit force total and per quarter-day assuming they all want to exit within a month
-    initial_nxm_exiting = NXM_exit_values[4]
+    initial_nxm_exiting = NXM_exit_values[0]
     remaining_nxm_exiting = initial_nxm_exiting
     nxm_out_per_qday = initial_nxm_exiting / (4 * 365 / 12)
     # threshold below which no-one wants to sell

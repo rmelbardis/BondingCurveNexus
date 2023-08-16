@@ -11,8 +11,8 @@ from BondingCurveNexus.model_params import NXM_exit_values
 
 def main():
     
-    run_name = "50_5,000OpenLiq_53,300ReserveLiq_2,700,000NXMExiting"
-    eth_reserve = 53_300
+    run_name = "45_5,000OpenLiq_38,750ReserveLiq_2,700,000NXMExiting"
+    eth_reserve = 38_750
     
     # Time to run the simulation for
     quarter_days = 487

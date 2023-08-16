@@ -39,11 +39,11 @@ contract Ramm {
     uint price_a = 0.03566 ether;
     uint price_b = 0.01418 ether;
 
-    eth = 10000 ether;
-    targetLiquidity = 10000 ether;
+    eth = 5000 ether;
+    targetLiquidity = 5000 ether;
     lastSwapTimestamp = block.timestamp;
 
-    budget = 4600 ether;
+    budget = 53300 ether;
     aggressiveLiqSpeed = 1000 ether;
 
     a.nxm = eth * 1 ether / price_a;
@@ -52,7 +52,7 @@ contract Ramm {
 
     b.nxm = eth * 1 ether / price_b;
     b.liqSpeed = 200 ether;
-    b.ratchetSpeed = 400;
+    b.ratchetSpeed = 1000;
 
     nxm = _nxm;
     capitalPool = _capitalPool;
