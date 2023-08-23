@@ -35,16 +35,10 @@ class wNxmMarket:
 
         # set ETH value for wNXM price shift as a result of 1 ETH of buy/sell
         self.wnxm_move_size = model_params.wnxm_move_size
-
-        self.wnxm_removed = 0
-        self.wnxm_created = 0
-
-        # set tracking lists for individual instance
-        self.wnxm_price_prediction = [self.wnxm_price]
-        self.wnxm_supply_prediction = [self.wnxm_supply]
-        self.wnxm_removed_prediction = [self.wnxm_removed]
-        self.wnxm_created_prediction = [self.wnxm_created]
-
+        self.arb_sale_size_nxm = 1000
+        self.arb_buy_size_eth = 21.6
+    
+    
     # WNXM MARKET FUNCTIONS
     def market_buy(self, n_wnxm, remove=True):
         # limit number of wnxm bought to total supply
@@ -59,7 +53,6 @@ class wNxmMarket:
         # if used for arb, remove from supply
         if remove:
             self.wnxm_supply -= n_wnxm
-            self.wnxm_removed += n_wnxm
 
     def market_sell(self, n_wnxm, create=True):
         # limit number of wnxm sold to total supply unless new wnxm is created
@@ -74,14 +67,15 @@ class wNxmMarket:
 
         # if used for arb, add to supply (& limit by nxm supply)
         if create:
-            old_supply = self.wnxm_supply
             self.wnxm_supply = min(self.wnxm_supply + n_wnxm, self.nxm.balanceOf(self.dev)/1e18)
-            self.wnxm_created += self.wnxm_supply - old_supply
 
  # daily percentage change in wNXM price
  # represents buys/sells in wnxm market without interacting with protocol
-    def wnxm_shift(self):
-        self.wnxm_price *= 1
+    def shift(self):
+        # set percentage changes in wnxm price using a normal distribution
+        self.wnxm_price *=  (1 + np.random.normal(loc=model_params.wnxm_drift,
+                                                 scale=model_params.wnxm_diffusion)
+                            )
 
     # WNXM-NXM ARBITRAGE TRANSACTION FUNCTIONS
     def arb_sale_transaction(self, n_nxm):
@@ -112,12 +106,12 @@ class wNxmMarket:
             # protocol sale price has to be higher than wnxm price for arbitrage
             # nxm supply has to be greater than zero
         while  self.ramm.getSpotPriceB()/1e18 > self.wnxm_price and \
-                self.nxm.balanceOf(self.dev)/1e18 > 0 and self.wnxm_supply > 0:
-            self.arb_sale_transaction()
+                self.nxm.balanceOf(self.dev)/1e18 > 0 and self.wnxm_supply > 0:     
+            self.arb_sale_transaction(n_nxm=self.arb_sale_size_nxm)
 
         # system price < wnxm_price arb
             # protocol price has to be lower than wnxm price for arbitrage
             # nxm supply has to be greater than zero
         while self.ramm.getSpotPriceA()/1e18 < self.wnxm_price and \
                 self.nxm.balanceOf(self.dev)/1e18 > 0:
-            self.arb_buy_transaction()
+            self.arb_buy_transaction(eth=self.arb_buy_size_eth)

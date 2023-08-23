@@ -34,16 +34,16 @@ contract Ramm {
 
   constructor (NXM _nxm, CapitalPool _capitalPool) {
     // middle price: 0.02 ether
-    // bv          : 0.0214 ether
+    // bv          : 0.0216 ether
     // RM: changing these to reflect likely opening params for transition from BC for internal price
-    uint price_a = 0.03566 ether;
-    uint price_b = 0.01418 ether;
+    uint price_a = 0.03426 ether;
+    uint price_b = 0.016 ether;
 
-    eth = 5000 ether;
-    targetLiquidity = 5000 ether;
+    eth = 10000 ether;
+    targetLiquidity = 10000 ether;
     lastSwapTimestamp = block.timestamp;
 
-    budget = 53300 ether;
+    budget = 33750 ether;
     aggressiveLiqSpeed = 1000 ether;
 
     a.nxm = eth * 1 ether / price_a;
