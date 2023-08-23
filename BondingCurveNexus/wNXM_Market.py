@@ -46,7 +46,7 @@ class wNxmMarket:
         self.wnxm_created_prediction = [self.wnxm_created]
 
     # WNXM MARKET FUNCTIONS
-    def wnxm_market_buy(self, n_wnxm, remove=True):
+    def market_buy(self, n_wnxm, remove=True):
         # limit number of wnxm bought to total supply
         n_wnxm = min(n_wnxm, self.wnxm_supply)
 
@@ -61,7 +61,7 @@ class wNxmMarket:
             self.wnxm_supply -= n_wnxm
             self.wnxm_removed += n_wnxm
 
-    def wnxm_market_sell(self, n_wnxm, create=True):
+    def market_sell(self, n_wnxm, create=True):
         # limit number of wnxm sold to total supply unless new wnxm is created
         if not create:
             n_wnxm = min(n_wnxm, self.wnxm_supply)
@@ -88,7 +88,7 @@ class wNxmMarket:
         # establish size of nxm sell, limit to number of nxm supply and wnxm supply
         num = min(n_nxm, self.wnxm_supply, self.nxm.balanceOf(self.dev)/1e18)
         # buy from open market
-        self.wnxm_market_buy(n_wnxm=num, remove=True)
+        self.market_buy(n_wnxm=num, remove=True)
         # sell to protocol
         self.ramm.swap(int(num*1e18), sender=self.dev)
 
@@ -105,7 +105,7 @@ class wNxmMarket:
         num = self.nxm.balanceOf(self.dev)/1e18 - old_sup
         
         # sell to open market
-        self.wnxm_market_sell(n_wnxm=num, create=True)
+        self.market_sell(n_wnxm=num, create=True)
 
     def arbitrage(self):
         # system price > wnxm_price arb
