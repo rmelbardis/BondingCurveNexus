@@ -11,8 +11,8 @@ from BondingCurveNexus.model_params import NXM_exit_values
 
 def main():
     
-    run_name = "5,000OpenLiq_1,500LiqIn_43,835ReserveLiq_2,025,000NXMExiting_50%Ratchet"
-    eth_reserve = 43_835
+    run_name = "10,000OpenLiq_1,200LiqIn_33,835ReserveLiq_2,025,000NXMExiting_30%Ratchet"
+    eth_reserve = 33_835
     
     # Time to run the simulation for
     quarter_days = 200
@@ -95,8 +95,8 @@ def main():
     fig, axs = plt.subplots(3, 2, figsize=(15,18))
     fig.suptitle(f'''Deterministic Protocol-only Model, Solidity Contracts
                  Opening liq of {liq_prediction[0]} ETH and Target liq of {liq_prediction[0]} ETH
-                 Initial high-injection ETH reserve of {eth_reserve} ETH. Ratchet speed = 50% of BV/day
-                 Initial liquidity movement/day resulting in max of 1500 ETH injection. Withdrawal and long-term injection at 100 ETH/day
+                 Initial high-injection ETH reserve of {eth_reserve} ETH. Ratchet speed = 30% of BV/day
+                 Initial liquidity movement/day resulting in max of 1200 ETH injection. Withdrawal and long-term injection at 100 ETH/day
                  Expecting {initial_nxm_exiting} NXM to want to sell over a 1-month period as long as price is at least {bv_threshold*100}% of BV
                  ''',
                  fontsize=16)
