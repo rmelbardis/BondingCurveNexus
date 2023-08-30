@@ -26,12 +26,12 @@ exit_shape = 1.7
 exit_loc = 0
 exit_scale = 1
 
-# Deterministic entry/exit size (rounded up from ~4.3 ETH lognormal mean above)
-det_entry_size = 10
-det_exit_size = 1
+# Deterministic entry/exit size in ETH
+det_entry_size = 30
+det_exit_size = 100
 
 # NXM value single exit size
-det_NXM_exit = 3_000
+det_NXM_exit = 1_000
 
 # NXM values for exiting in 1 month - Liq Stage 1
 NXM_exit_values = [675_000, 1_012_500, 1_350_000, 2_025_000, 2_700_000]
@@ -41,9 +41,9 @@ det_entry_array = np.full(shape=model_days, fill_value=lambda_entries, dtype=int
 det_exit_array = np.full(shape=model_days, fill_value=lambda_exits, dtype=int)
 
 # number of times the model shifts wnxm price randomly per day
-wnxm_shifts_per_day = 4
+wnxm_shifts_per_day = 1
 # wnxm price movements (normal distribution of % change per shift)
-wnxm_drift = -0.0025
+wnxm_drift = 0
 wnxm_diffusion = (1+0.065)**(1/wnxm_shifts_per_day) - 1
 
 # wnxm price movement per eth of buy/sell pressure

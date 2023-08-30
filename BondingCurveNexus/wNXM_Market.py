@@ -35,8 +35,8 @@ class wNxmMarket:
 
         # set ETH value for wNXM price shift as a result of 1 ETH of buy/sell
         self.wnxm_move_size = model_params.wnxm_move_size
-        self.arb_sale_size_nxm = 1000
-        self.arb_buy_size_eth = 21.6
+        self.arb_sale_size_nxm = model_params.det_NXM_exit
+        self.arb_buy_size_eth = model_params.det_entry_size
     
     
     # WNXM MARKET FUNCTIONS

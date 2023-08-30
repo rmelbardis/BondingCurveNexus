@@ -36,14 +36,14 @@ contract Ramm {
     // middle price: 0.02 ether
     // bv          : 0.0216 ether
     // RM: changing these to reflect likely opening params for transition from BC for internal price
-    uint price_a = 0.03426 ether;
-    uint price_b = 0.016 ether;
+    uint price_a = 0.022 ether;
+    uint price_b = 0.021 ether;
 
     eth = 5000 ether;
     targetLiquidity = 5000 ether;
     lastSwapTimestamp = block.timestamp;
 
-    budget = 43835 ether;
+    budget = 0 ether;
     aggressiveLiqSpeed = 1500 ether;
 
     a.nxm = eth * 1 ether / price_a;
@@ -52,7 +52,7 @@ contract Ramm {
 
     b.nxm = eth * 1 ether / price_b;
     b.liqSpeed = 100 ether;
-    b.ratchetSpeed = 5000;
+    b.ratchetSpeed = 400;
 
     nxm = _nxm;
     capitalPool = _capitalPool;
