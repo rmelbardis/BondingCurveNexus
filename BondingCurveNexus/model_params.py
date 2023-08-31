@@ -27,7 +27,7 @@ exit_loc = 0
 exit_scale = 1
 
 # Deterministic entry/exit size in ETH
-det_entry_size = 30
+det_entry_size = 25
 det_exit_size = 100
 
 # NXM value single exit size

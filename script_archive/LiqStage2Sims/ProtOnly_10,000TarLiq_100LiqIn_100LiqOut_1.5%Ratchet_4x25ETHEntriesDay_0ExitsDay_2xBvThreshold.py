@@ -13,7 +13,7 @@ from BondingCurveNexus.wNXM_Market import wNxmMarket
 
 def main():
     
-    run_name = "ProtOnly_5,000TarLiq_100LiqIn_100LiqOut_4%Ratchet_4x30ETHEntriesDay_0ExitsDay_2xBvThreshold"
+    run_name = "ProtOnly_10,000TarLiq_100LiqIn_100LiqOut_1.5%Ratchet_4x25ETHEntriesDay_0ExitsDay_2xBvThreshold"
     # eth_reserve = 43_835
     
     # Time to run the simulation for
@@ -127,7 +127,7 @@ def main():
     # Destructuring initialization
     fig, axs = plt.subplots(3, 2, figsize=(15,18))
     fig.suptitle(f'''Deterministic Protocol Model, Solidity Contracts
-                 Target liq of {liq_prediction[0]} ETH. Ratchet speed = 4% of BV/day.
+                 Target liq of {liq_prediction[0]} ETH. Ratchet speed = 1.5% of BV/day.
                  Liq withdrawal of 100 ETH/day and long-term liq injection at 100 ETH/day
                  {lambda_exits} {wnxm.arb_sale_size_nxm} NXM exits per day. {lambda_entries} {wnxm.arb_buy_size_eth} ETH entries per day.
                  No one buys NXM above {bv_threshold_buy*100}% of BV 
