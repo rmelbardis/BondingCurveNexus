@@ -5,16 +5,16 @@ Define modelling parameters for simulation
 import numpy as np
 
 # number of days to run the model for
-model_days = 365*2
+model_days = 180
 
 #### ---- MARKET PARAMETERS ---- ####
 # multiple of book value where noone is buying NXM anymore
-nxm_book_value_multiple = 3
+nxm_book_value_multiple = 1000
 
 # mean number of users entering and exiting the system
 # to be modelled by poisson distribution, or used as deterministic number
-lambda_entries = 100
-lambda_exits = 100
+lambda_entries = 4
+lambda_exits = 0
 
 # lognormal distribution of size of ENTRIES AND EXITS in ETH
 # parameterised to median value being ~1 ETH, upper quartile ~3 ETH. Some 1000+ ETH buys/sells
@@ -26,19 +26,25 @@ exit_shape = 1.7
 exit_loc = 0
 exit_scale = 1
 
-# Deterministic entry/exit size (rounded up from ~4.3 ETH lognormal mean above)
-det_entry_size = 5
-det_exit_size = 5
+# Deterministic entry/exit size in ETH
+det_entry_size = 25
+det_exit_size = 100
+
+# NXM value single exit size
+det_NXM_exit = 1_000
+
+# NXM values for exiting in 1 month - Liq Stage 1
+NXM_exit_values = [675_000, 1_012_500, 1_350_000, 2_025_000, 2_700_000]
 
 # Deterministic entry array & exit array - numbers per day
 det_entry_array = np.full(shape=model_days, fill_value=lambda_entries, dtype=int)
 det_exit_array = np.full(shape=model_days, fill_value=lambda_exits, dtype=int)
 
 # number of times the model shifts wnxm price randomly per day
-wnxm_shifts_per_day = 5
+wnxm_shifts_per_day = 1
 # wnxm price movements (normal distribution of % change per shift)
 wnxm_drift = 0
-wnxm_diffusion = (1+0.02)**(1/wnxm_shifts_per_day) - 1
+wnxm_diffusion = (1+0.065)**(1/wnxm_shifts_per_day) - 1
 
 # wnxm price movement per eth of buy/sell pressure
 # size based on 500,000 USD moving the price by 2% when wNXM price is 0.01 ETH
@@ -49,7 +55,6 @@ wnxm_move_size = 5e-7
 
 # number of times we model the ratchets and liquidity shifting per day
 ratchets_per_day = 10
-liq_moves_per_day = 10
 
 #### ---- NON-MARKET SYSTEM PARAMETERS ---- ####
 # normal distribution of daily % change in active COVER AMOUNT

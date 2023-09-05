@@ -3,14 +3,10 @@ pip>=9
 setuptools>=26
 twine
 wheel>=0.29
-jupyterlab
 
 # data science
 numpy
-pandas
-scikit-learn
 matplotlib
-seaborn
 
 # api
 requests
@@ -18,3 +14,8 @@ requests
 # utils
 ipython
 etherscan-python
+
+# ape
+eth-ape
+ape-foundry
+ape-solidity
