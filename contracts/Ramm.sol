@@ -48,7 +48,7 @@ contract Ramm {
 
     a.nxm = eth * 1 ether / price_a;
     a.liqSpeed = 100 ether;
-    a.ratchetSpeed = 400;
+    a.ratchetSpeed = 375;
 
     b.nxm = eth * 1 ether / price_b;
     b.liqSpeed = 100 ether;
