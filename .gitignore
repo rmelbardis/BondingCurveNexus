@@ -2,6 +2,7 @@
 .build
 .coverage
 .ipynb_checkpoints
+.idea
 .DS_Store
 raw_data/
 *.csv
