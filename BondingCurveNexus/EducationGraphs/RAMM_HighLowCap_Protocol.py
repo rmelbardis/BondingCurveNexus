@@ -282,10 +282,6 @@ class RAMMHighLowCapProtocol:
                 # down for above BV/buy pool
                 self.buy_ratchet()
 
-            #-----WNXM SHIFT-----#
-            if event == 'wnxm_shift':
-                self.wnxm_shift()
-
             #-----protocol BUY-----#
             # not arbitrage-driven
             if event == 'protocol_buy':
