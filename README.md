@@ -51,7 +51,7 @@ There are two kinds of models available - "Protocol", which captures only the fe
 To run a single deterministic simulation of the model call `BondingCurveNexus/HighLowCap/single_sim_protocol_det.py`
 The graphs can then be displayed in your environment using the `show_graphs()` function.
 
-`one_day_passes` behaviours for Protocol model:
+`one_day_passes()` behaviours for Protocol model:
 
 | Daily Behaviour  | Description |
 | ------------- | ------------- |
@@ -81,7 +81,7 @@ Variables tracked by the model in the `..._prediction` lists and displayed by `s
 To run a single deterministic simulation of the model call `BondingCurveNexus/HighLowCap/single_sim_markets_det.py`
 The graphs can then be displayed in your environment using the `show_graphs()` function.
 
-`one_day_passes` behaviours for Market model:
+`one_day_passes()` behaviours for Market model:
 
 | Daily Behaviour  | Description |
 | ------------- | ------------- |
