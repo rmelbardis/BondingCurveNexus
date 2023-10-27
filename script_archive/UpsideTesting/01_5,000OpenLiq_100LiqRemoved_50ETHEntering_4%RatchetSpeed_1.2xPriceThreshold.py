@@ -11,22 +11,16 @@ from BondingCurveNexus.model_params import NXM_entry_values
 
 def main():
     
-    run_name = "96_10,000OpenLiq_1,000LiqRemoved_1,500ETHEntering_10%RatchetSpeed_NoPriceThreshold"
-    ratchet_speed = 10
-    liq_withdrawal = 1000
+    run_name = "01_10,000OpenLiq_100LiqRemoved_50ETHEntering_4%RatchetSpeed_1.2xPriceThreshold"
+    ratchet_speed = 4
+    liq_withdrawal = 100
     
     # eth entries daily and quarter-daily
-    daily_eth_entering = NXM_entry_values[3]
+    daily_eth_entering = NXM_entry_values[0]
     eth_in_per_qday = daily_eth_entering / 4
-    
     # threshold above which no-one wants to buy
-    threshold = False
-    bv_threshold = 2
-    # for graph title
-    if not threshold:
-        threshold_input = 'infinite'
-    else:
-        threshold_input = bv_threshold * 100
+    threshold = True
+    bv_threshold = 1.2
     
     # Time to run the simulation for
     quarter_days = 120
@@ -71,10 +65,7 @@ def main():
         # SWAP ETH EVERY TIME
         
         # assume swapping only happens if NXM price is above a certain percentage of BV
-        if not threshold: 
-                ramm.swap(0, value=int(eth_in_per_qday * 1e18), sender=dev)
-        else:
-            if spot_price_a_prediction[-1] < book_value_prediction[-1] * bv_threshold: 
+        if threshold and spot_price_a_prediction[-1] < book_value_prediction[-1] * bv_threshold: 
                 ramm.swap(0, value=int(eth_in_per_qday * 1e18), sender=dev)
 
         # RECORD METRICS & TIME
@@ -97,7 +88,7 @@ def main():
     fig.suptitle(f'''Deterministic Protocol-only Model, Solidity Contracts
                  Opening and target liq of {liq_prediction[0]} ETH
                  Ratchet speed = {ratchet_speed}% of BV/day. Max daily liquidity withdrawal of {liq_withdrawal} ETH.
-                 Testing {daily_eth_entering} ETH entering/day as long as price is no more than {threshold_input}% of BV
+                 Testing {daily_eth_entering} ETH entering/day as long as price is no more than {bv_threshold * 100}% of BV
                  ''',
                  fontsize=16)
     # fig.tight_layout()

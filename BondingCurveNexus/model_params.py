@@ -36,6 +36,8 @@ det_NXM_exit = 1_000
 # NXM values for exiting in 1 month - Liq Stage 1
 NXM_exit_values = [675_000, 1_012_500, 1_350_000, 2_025_000, 2_700_000]
 
+
+
 # Deterministic entry array & exit array - numbers per day
 det_entry_array = np.full(shape=model_days, fill_value=lambda_entries, dtype=int)
 det_exit_array = np.full(shape=model_days, fill_value=lambda_exits, dtype=int)
@@ -84,3 +86,8 @@ claim_scale = 15
 
 # claim assessment reward (assuming premium was 1% of claim size)
 claim_ass_reward = 0.002
+
+#### ---- UPSIDE TESTING ---- ####
+
+# ETH values for daily entries over 1 month
+NXM_entry_values = [50, 250, 1_000, 1_500]
