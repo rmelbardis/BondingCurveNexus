@@ -1,4 +1,12 @@
 ethereum:
   default_network: local
   local:
-    default_provider: foundry
+    default_provider: hardhat
+
+hardhat:
+  host: http://host.docker.internal:8545
+
+test:
+  mnemonic: test test test test test test test test test test test junk
+  hd_path: "m/44'/60'/0'/0/{}"
+  number_of_accounts: 20

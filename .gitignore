@@ -10,3 +10,4 @@ raw_data/
 .env
 BondingCurveNexus/config.py
 graphs/
+node_modules/

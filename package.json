@@ -1,0 +1,11 @@
+{
+  "name": "ape",
+  "version": "1.0.0",
+  "description": "## Working with docker/ape/hardhat",
+  "main": "index.js",
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "hardhat": "^2.19.0"
+  }
+}
