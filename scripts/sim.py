@@ -1,15 +1,45 @@
-from ape import networks, accounts, project
+from ape import networks, accounts, project, Contract
 import click
 import numpy as np
 import matplotlib.pyplot as plt
 import datetime
 import os
 import shutil
+import json
+from ape import networks, accounts, project, Contract
+from random import shuffle
 from BondingCurveNexus.sys_params import pool_eth, pool_dai, eth_price_usd, mcr_now, nxm_supply_now
 from BondingCurveNexus.model_params import NXM_entry_values
 
 
 def main():
+    addresses_file = "./deployment/addresses.json"
+    with open(addresses_file, 'r') as file:
+      addresses = json.load(file)
+
+    dev = accounts.test_accounts[0]
+    dev.balance = int(1e27)
+
+    # define constants for addresses
+    TC = addresses.get('TokenController')
+    NXM = addresses.get('NXMToken')
+    POOL = addresses.get('Pool')
+
+    # initialize contracts
+    nxm = Contract(NXM, abi="./deployment/abis/NXMToken.json")
+    pool = Contract(POOL, abi="./deployment/abis/Pool.json")
+
+    # set the block base fee to 0 and impersonate TokenController to make a call
+    #networks.provider._make_request("hardhat_setNextBlockBaseFeePerGas", ['0x0'])
+    #nxm.mint(dev, int(1e18), sender=TC)
+
+    print (f'NXM supply = {nxm.totalSupply() / 1e18}')
+
+    print (f'NXM balance = {nxm.balanceOf(dev) / 1e18}')
+
+    print (f'Pool value in ETH = {pool.getPoolValueInEth() / 1e18}')
+
+def mainx():
     
     run_name = "96_10,000OpenLiq_1,000LiqRemoved_1,500ETHEntering_10%RatchetSpeed_NoPriceThreshold"
     ratchet_speed = 10
@@ -138,27 +168,27 @@ def main():
     graph_dest_dir = src_dir + "/graphs/upside_testing"
     graph_src_file = os.path.join(src_dir, "graphs", "graph.png")
     # copy the file to destination dir
-    shutil.copy(graph_src_file , graph_dest_dir) 
+    shutil.copy(graph_src_file , graph_dest_dir)
 
     # rename the file
     graph_dest_file = os.path.join(graph_dest_dir, 'graph.png')
     new_graph_file_name = os.path.join(graph_dest_dir, f'{run_name}.png')
 
     os.rename(graph_dest_file, new_graph_file_name)
-    
+
     # print message that it's happened
     print(f'graph copied to {new_graph_file_name}')
-    
+
     # copy script
     script_dest_dir = src_dir + "/script_archive/UpsideTesting"
     script_src_file = os.path.join(src_dir, "scripts", "sim.py")
     # copy the file to destination dir
-    shutil.copy(script_src_file , script_dest_dir) 
+    shutil.copy(script_src_file , script_dest_dir)
 
     # rename the file
     script_dest_file = os.path.join(script_dest_dir, 'sim.py')
     new_script_file_name = os.path.join(script_dest_dir, f'{run_name}.py')
 
     os.rename(script_dest_file, new_script_file_name) # rename
-    
+
     print(f'script copied to {new_script_file_name}')
