@@ -24,8 +24,9 @@ class RAMMHighLowCapMarkets:
 
     def __init__(self, daily_printout_day=0):
         # OPENING STATE of system upon initializing a projection instance
-        # start at day 0
+        # start at day 0 & step 0
         self.current_day = 0
+        self.steps = 0
         # set daily printout parameter. If not specified, it defaults to 0 and no printouts happen
         self.daily_printout_day = daily_printout_day
         # set current state of system
@@ -35,8 +36,8 @@ class RAMMHighLowCapMarkets:
         self.wnxm_supply = sys_params.wnxm_supply_now
 
         # set opening prices
-        self.wnxm_price = sys_params.wnxm_price_now
-        self.sell_open_price = self.wnxm_price
+        self.wnxm_price = self.book_value()
+        self.sell_open_price = self.book_value() * (1 + sys_params.oracle_buffer)
         self.buy_open_price = self.book_value() * (1 + sys_params.oracle_buffer)
 
         # set ETH value for wNXM price shift as a result of 1 ETH of buy/sell
@@ -284,9 +285,7 @@ class RAMMHighLowCapMarkets:
         # find new liquidity by moving down to target at daily percentage rate
         # divided by number of times we're ratcheting per day
         # limit at target
-        if self.liq > self.target_liq and\
-           self.spot_price_a() > self.ratchet_target() * (1 + sys_params.oracle_buffer) and\
-           self.spot_price_b() == self.ratchet_target() * (1 - sys_params.oracle_buffer):
+        if self.liq > self.target_liq:
             new_liq = max(self.liq - self.target_liq * sys_params.liq_out_perc / model_params.ratchets_per_day,
                                     self.target_liq)
 
@@ -320,9 +319,7 @@ class RAMMHighLowCapMarkets:
         # find new liquidity by moving up to target at daily percentage rate
         # divided by number of times we're moving liquidity per day
         # limit at target
-        if self.liq < self.target_liq and self.cap_pool > self.mcr() + self.target_liq and\
-           self.spot_price_b() < self.ratchet_target() * (1 - sys_params.oracle_buffer) and\
-           round(self.spot_price_a(), 8) == round(self.ratchet_target() * (1 + sys_params.oracle_buffer), 8):
+        if self.liq < self.target_liq and self.cap_pool > self.mcr() + self.target_liq:
             new_liq = min(self.liq + self.target_liq * sys_params.liq_in_perc / model_params.ratchets_per_day,
                                     self.target_liq)
 
@@ -438,3 +435,37 @@ class RAMMHighLowCapMarkets:
 
         # increment day
         self.current_day += 1
+
+    
+    def show_metrics(self):
+        # print snapshot
+        print(f' Capital pool: {self.cap_pool} ETH')
+        print(f' Below NXM price: {self.spot_price_b()} ETH')
+        print(f' Above NXM price: {self.spot_price_a()} ETH')
+        print(f' wNXM price: {self.wnxm_price} ETH')
+        print(f' NXM Supply: {self.nxm_supply}')
+        print(f' wNXM Supply: {self.wnxm_supply}')
+        print(f' Book Value: {self.book_value()} ETH')
+        print(f' RAMM ETH Liquidity: {self.liq}')
+        print(f' Below NXM Reserve: {self.liq_NXM_b}')
+        print(f' Above NXM Reserve: {self.liq_NXM_a}')
+
+    def write_metrics(self):
+        # add to record
+        self.cap_pool_prediction.append(self.cap_pool)
+        self.spot_price_b_prediction.append(self.spot_price_b())
+        self.spot_price_a_prediction.append(self.spot_price_a())
+        self.wnxm_price_prediction.append(self.wnxm_price())
+        self.nxm_supply_prediction.append(self.nxm_supply)
+        self.wnxm_supply_prediction.append(self.wnxm_supply)
+        self.book_value_prediction.append(self.book_value())
+        self.liq_prediction.append(self.liq)
+        self.liq_NXM_b_prediction.append(self.liq_NXM_b)
+        self.liq_NXM_a_prediction.append(self.liq_NXM_a)
+        self.eth_sold_prediction.append(self.eth_sold)
+        self.eth_acquired_prediction.append(self.eth_acquired)
+        self.nxm_burned_prediction.append(self.nxm_burned)
+        self.nxm_minted_prediction.append(self.nxm_minted)
+
+        # increment step
+        self.steps += 1

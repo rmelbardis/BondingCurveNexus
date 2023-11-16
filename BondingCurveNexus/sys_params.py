@@ -6,7 +6,7 @@ import requests
 # DUNE VALUES TODAY - UPDATES REQUIRED REGULARLY #
 # TODO: pull these in automatically
 act_cover_now = 30_104
-cap_pool_now = 101_773
+cap_pool_now = 146_000
 
 # coingecko price api
 price_url = 'https://api.coingecko.com/api/v3/simple/price'
@@ -32,8 +32,8 @@ wnxm_supply_url = 'https://api.coingecko.com/api/v3/coins/wrapped-nxm'
 wnxm_supply_now = requests.get(wnxm_supply_url).json()['market_data']['total_supply']
 
 # nxm supply from coingecko api
-# nxm_supply_url = 'https://api.coingecko.com/api/v3/coins/nxm'
-nxm_supply_now = 4_733_947 # requests.get(nxm_supply_url).json()['market_data']['total_supply']
+nxm_supply_url = 'https://api.coingecko.com/api/v3/coins/nxm'
+nxm_supply_now = requests.get(nxm_supply_url).json()['market_data']['total_supply']
 
 # SYSTEM PARAMETERS - CURRENTLY FIXED BUT MAY BE SUBJECT TO CHANGE #
 capital_factor = 4.8

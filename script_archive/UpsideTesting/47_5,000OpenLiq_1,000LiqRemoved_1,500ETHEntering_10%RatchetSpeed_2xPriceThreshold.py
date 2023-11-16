@@ -11,7 +11,7 @@ from BondingCurveNexus.model_params import NXM_entry_values
 
 def main():
     
-    run_name = "96_10,000OpenLiq_1,000LiqRemoved_1,500ETHEntering_10%RatchetSpeed_NoPriceThreshold"
+    run_name = "47_5,000OpenLiq_1,000LiqRemoved_1,500ETHEntering_10%RatchetSpeed_2xPriceThreshold"
     ratchet_speed = 10
     liq_withdrawal = 1000
     
@@ -20,7 +20,7 @@ def main():
     eth_in_per_qday = daily_eth_entering / 4
     
     # threshold above which no-one wants to buy
-    threshold = False
+    threshold = True
     bv_threshold = 2
     # for graph title
     if not threshold:
