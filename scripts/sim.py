@@ -6,7 +6,6 @@ import datetime
 import os
 import shutil
 import json
-from ape import networks, accounts, project, Contract
 from random import shuffle
 from BondingCurveNexus.sys_params import pool_eth, pool_dai, eth_price_usd, mcr_now, nxm_supply_now
 from BondingCurveNexus.model_params import NXM_entry_values
