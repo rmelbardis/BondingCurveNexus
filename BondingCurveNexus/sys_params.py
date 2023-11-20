@@ -15,7 +15,8 @@ eth_price_params = {
         'ids':'ethereum',
         'vs_currencies': 'usd'
         }
-eth_price_usd = requests.get(price_url, params=eth_price_params).json()['ethereum']['usd']
+#eth_price_usd = requests.get(price_url, params=eth_price_params).json()['ethereum']['usd']
+eth_price_usd = 2000
 
 pool_dai = 5_040_000
 pool_eth = cap_pool_now - (pool_dai / eth_price_usd)

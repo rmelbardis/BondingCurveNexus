@@ -21,4 +21,4 @@ RUN rm requirements.txt
 RUN useradd -m ubuntu
 USER ubuntu
 
-CMD nodemon -w . -e py -x ape run sim
+CMD nodemon -w scripts -e py -x ape run sim

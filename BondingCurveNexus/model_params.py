@@ -33,11 +33,6 @@ det_exit_size = 100
 # NXM value single exit size
 det_NXM_exit = 1_000
 
-# NXM values for exiting in 1 month - Liq Stage 1
-NXM_exit_values = [675_000, 1_012_500, 1_350_000, 2_025_000, 2_700_000]
-
-
-
 # Deterministic entry array & exit array - numbers per day
 det_entry_array = np.full(shape=model_days, fill_value=lambda_entries, dtype=int)
 det_exit_array = np.full(shape=model_days, fill_value=lambda_exits, dtype=int)
@@ -91,3 +86,6 @@ claim_ass_reward = 0.002
 
 # ETH values for daily entries over 1 month
 NXM_entry_values = [50, 250, 1_000, 1_500]
+
+# NXM values for exiting in 1 month - Initial Phase
+NXM_exit_values = [676_000, 1_014_000, 1_352_000, 2_028_000, 2_704_000, 3_380_000, 4_056_000, 4_732_000]

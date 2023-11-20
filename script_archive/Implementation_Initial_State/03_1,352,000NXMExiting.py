@@ -75,10 +75,10 @@ def main():
     times = np.array([(datetime.datetime.fromtimestamp(block.timestamp) - datetime.datetime.now())
                       / datetime.timedelta(days=1)])
     
-    run_name = "08_4,732,000NXMExiting"
+    run_name = "03_1,352,000NXMExiting"
     
     # set nxm exits monthly, daily and quarter-daily
-    initial_nxm_exiting = NXM_exit_values[7]
+    initial_nxm_exiting = NXM_exit_values[2]
     remaining_nxm_exiting = initial_nxm_exiting
     
     daily_nxm_exiting = initial_nxm_exiting / 30.417

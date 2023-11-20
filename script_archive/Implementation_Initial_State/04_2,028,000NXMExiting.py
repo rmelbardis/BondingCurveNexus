@@ -70,39 +70,6 @@ def main():
     print (f'NXM Dev balance = {nxm.balanceOf(dev) / 1e18}')
     print (f'Pool value in ETH = {pool.getPoolValueInEth() / 1e18}')
     
-
-    block = networks.provider.get_block('latest')
-    times = np.array([(datetime.datetime.fromtimestamp(block.timestamp) - datetime.datetime.now())
-                      / datetime.timedelta(days=1)])
-    
-    run_name = "08_4,732,000NXMExiting"
-    
-    # set nxm exits monthly, daily and quarter-daily
-    initial_nxm_exiting = NXM_exit_values[7]
-    remaining_nxm_exiting = initial_nxm_exiting
-    
-    daily_nxm_exiting = initial_nxm_exiting / 30.417
-    nxm_out_per_qday = daily_nxm_exiting / 4
-    print(f'nxm out every quarter day = {nxm_out_per_qday}')
-    
-    # variables only used for graph header 
-    ratchet_speed = 4
-    fast_ratchet_speed = 50 
-    fast_liq_injection = 1500
-    liq_injection = 100
-
-    # threshold above which no-one wants to sell & whether enabled
-    threshold = True
-    bv_threshold = 0.95
-    # for graph title
-    if not threshold:
-        threshold_input = 0
-    else:
-        threshold_input = bv_threshold * 100
-    
-    # Time to run the simulation for
-    quarter_days = 365
-    
     # Tracking Metrics
     cap_pool_prediction = np.array([pool.getPoolValueInEth()/1e18])
     cap_pool_change_prediction = np.array([cap_pool_prediction[0] - cap_pool_prediction[-1]])
@@ -115,9 +82,36 @@ def main():
     liq_NXM_a_prediction = np.array([ramm.getReserves()[1]/1e18])
     budget_prediction = np.array([ramm.getReserves()[3]/1e18])
     ip_prediction = np.array([ramm.getInternalPrice()/1e18])
-    nxm_exiting_prediction = np.array([remaining_nxm_exiting])
+
+    block = networks.provider.get_block('latest')
+    times = np.array([(datetime.datetime.fromtimestamp(block.timestamp) - datetime.datetime.now()) / datetime.timedelta(days=1)])
     
-    # MAIN TIME LOOP
+    run_name = "04_2,028,000NXMExiting"
+    ratchet_speed = 4
+    fast_ratchet_speed = 50 
+    fast_liq_injection = 1500
+    liq_injection = 100
+
+    # threshold above which no-one wants to sell
+    threshold = True
+    bv_threshold = 0.95
+    # for graph title
+    if not threshold:
+        threshold_input = 0
+    else:
+        threshold_input = bv_threshold * 100
+    
+    # Time to run the simulation for
+    quarter_days = 365
+    
+    # nxm exits monthly, daily and quarter-daily
+    initial_nxm_exiting = NXM_exit_values[3]
+    remaining_nxm_exiting = initial_nxm_exiting
+    
+    daily_nxm_exiting = initial_nxm_exiting / 30.417
+    nxm_out_per_qday = daily_nxm_exiting / 4
+    print(f'nxm out every quarter day = {nxm_out_per_qday}')
+    
     for i in range(quarter_days):
 
         # MOVE TIME
@@ -139,7 +133,6 @@ def main():
         print(f'before swap NXM_a = {liq_NXM_a_prediction[-1]}')
         print(f'before swap budget = {budget_prediction[-1]}')
         print(f'before swap ip = {ip_prediction[-1]}')
-        print(f'before swap nxm exiting = {nxm_exiting_prediction[-1]}')
         
         # assume swapping only happens if all NXM exiting has already exited
         if remaining_nxm_exiting > 0:
@@ -154,8 +147,7 @@ def main():
         
         # RECORD METRICS & TIME
 
-        times = np.append(times, [(datetime.datetime.fromtimestamp(block.timestamp) - datetime.datetime.now())
-                                  / datetime.timedelta(days=1)])
+        times = np.append(times, [(datetime.datetime.fromtimestamp(block.timestamp) - datetime.datetime.now()) / datetime.timedelta(days=1)])
 
         cap_pool_prediction = np.append(cap_pool_prediction, [pool.getPoolValueInEth()/1e18])
         cap_pool_change_prediction = np.append(cap_pool_change_prediction, [cap_pool_prediction[0] - cap_pool_prediction[-1]])
@@ -168,8 +160,7 @@ def main():
         liq_NXM_a_prediction = np.append(liq_NXM_a_prediction, [ramm.getReserves()[1]/1e18])
         budget_prediction = np.append(budget_prediction, [ramm.getReserves()[3]/1e18])
         ip_prediction = np.append(ip_prediction, [ramm.getInternalPrice()/1e18])
-        nxm_exiting_prediction = np.append(nxm_exiting_prediction, [remaining_nxm_exiting])
-        
+
         print(f'after swap pool = {cap_pool_prediction[-1]}')
         print(f'after swap supply = {nxm_supply_prediction[-1]}')
         print(f'after swap BV = {book_value_prediction[-1]}')
@@ -180,7 +171,6 @@ def main():
         print(f'after swap NXM_a = {liq_NXM_a_prediction[-1]}')
         print(f'after swap budget = {budget_prediction[-1]}')
         print(f'after swap ip = {ip_prediction[-1]}')
-        print(f'after swap nxm exiting = {nxm_exiting_prediction[-1]}')
           
     #-----GRAPHS-----#
     # Destructuring initialization
@@ -189,7 +179,7 @@ def main():
                  Opening and target liq of {liq_prediction[0]} ETH; Budget of {budget_prediction[0]} ETH
                  Ratchet speed while budget lasts = {fast_ratchet_speed}% of BV/day; {ratchet_speed}% of BV/day after
                  Max daily liquidity injection of {fast_liq_injection} ETH while budget lasts and {liq_injection} ETH after 
-                 Testing {nxm_exiting_prediction[0]} NXM exiting over at least a month and as long as price is more than {threshold_input}% of BV
+                 Testing {round(daily_nxm_exiting, 2)} NXM exiting/day as long as price is more than {threshold_input}% of BV
                  ''',
                  fontsize=16)
     # fig.tight_layout()
@@ -206,10 +196,8 @@ def main():
     axs[0, 1].plot(times, cap_pool_prediction)
     axs[0, 1].set_title('cap_pool')
     # Subplot
-    axs[1, 0].plot(times, nxm_supply_prediction, label='nxm supply')
-    axs[1, 0].plot(times, nxm_exiting_prediction, label='nxm exiting')
+    axs[1, 0].plot(times, nxm_supply_prediction, label='nxm')
     axs[1, 0].set_title('nxm_supply')
-    axs[1, 0].legend()
     # Subplot
     axs[1, 1].plot(times, liq_NXM_b_prediction, label='NXM reserve below')
     axs[1, 1].plot(times, liq_NXM_a_prediction, label='NXM reserve above')
