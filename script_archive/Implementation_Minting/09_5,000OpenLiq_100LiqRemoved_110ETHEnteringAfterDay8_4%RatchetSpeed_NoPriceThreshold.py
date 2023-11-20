@@ -74,19 +74,17 @@ def main():
     times = np.array([(datetime.datetime.fromtimestamp(block.timestamp) - datetime.datetime.now())
                       / datetime.timedelta(days=1)])
     
-    run_name = "12_5,000OpenLiq_100LiqRemoved_3000ETHEnteringPerDayAfterDay8_HourlyIntervals_4%RatchetSpeed_NoPriceThreshold"
+    run_name = "09_5,000OpenLiq_100LiqRemoved_110ETHEnteringAfterDay8_4%RatchetSpeed_NoPriceThreshold"
     
     # variables only used for graph header 
     ratchet_speed = 4
     liq_withdrawal = 100
 
     # eth entries in transaction
-    eth_in_daily = 3000
-    eth_in = eth_in_daily / 24
+    eth_in = 110
     
     # Time to run the simulation for
-    # hoursquarter_days = 120
-    hours = 720
+    quarter_days = 120
     
     # Tracking Metrics
     cap_pool_prediction = np.array([pool.getPoolValueInEth()/1e18])
@@ -102,11 +100,11 @@ def main():
     nxm_minted_prediction = np.array([nxm_supply_prediction[-1] - nxm_supply_prediction[0]])
     
     # MAIN TIME LOOP
-    for i in range(hours):
+    for i in range(quarter_days):
 
         # MOVE TIME
         print(f'time = {times[-1]}')
-        networks.provider.set_timestamp(block.timestamp + 3_600)
+        networks.provider.set_timestamp(block.timestamp + 21_600)
         networks.provider.mine()
         block = networks.provider.get_block('latest')
 
@@ -125,7 +123,7 @@ def main():
         print(f'nxm minted = {nxm_minted_prediction[-1]}')
         
         # assume swapping only happens if NXM price is above a certain percentage of BV
-        if i > 192: 
+        if i > 36: 
                 ramm.swap(0, 0, 32503680000,
                           value=int(eth_in * 1e18), sender=dev)
         
@@ -163,7 +161,7 @@ def main():
     fig.suptitle(f'''Deterministic Protocol-only Model, Solidity Contracts
                  Opening and target liq of {liq_prediction[0]} ETH
                  Ratchet speed = {ratchet_speed}% of BV/day. Max daily liquidity withdrawal of {liq_withdrawal} ETH.
-                 Testing {eth_in_daily} ETH entering/day after Day 8
+                 Testing {eth_in} ETH entering/day after Day 8
                  ''',
                  fontsize=16)
     # fig.tight_layout()

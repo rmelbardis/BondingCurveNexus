@@ -74,19 +74,20 @@ def main():
     times = np.array([(datetime.datetime.fromtimestamp(block.timestamp) - datetime.datetime.now())
                       / datetime.timedelta(days=1)])
     
-    run_name = "12_5,000OpenLiq_100LiqRemoved_3000ETHEnteringPerDayAfterDay8_HourlyIntervals_4%RatchetSpeed_NoPriceThreshold"
+    run_name = "01_Single_1m_NXM_Sell_After2DaysNXMExiting"
+    
+    # set nxm exit size
+    nxm_out = 1_000_000
+    print(f'nxm sale after 2 days = {nxm_out}')
     
     # variables only used for graph header 
     ratchet_speed = 4
-    liq_withdrawal = 100
-
-    # eth entries in transaction
-    eth_in_daily = 3000
-    eth_in = eth_in_daily / 24
+    fast_ratchet_speed = 50 
+    fast_liq_injection = 1500
+    liq_injection = 100
     
     # Time to run the simulation for
-    # hoursquarter_days = 120
-    hours = 720
+    quarter_days = 20
     
     # Tracking Metrics
     cap_pool_prediction = np.array([pool.getPoolValueInEth()/1e18])
@@ -98,19 +99,17 @@ def main():
     spot_price_a_prediction = np.array([ramm.getSpotPrices()[0]/1e18])
     liq_NXM_b_prediction = np.array([ramm.getReserves()[2]/1e18])
     liq_NXM_a_prediction = np.array([ramm.getReserves()[1]/1e18])
+    budget_prediction = np.array([ramm.getReserves()[3]/1e18])
     ip_prediction = np.array([ramm.getInternalPrice()/1e18])
-    nxm_minted_prediction = np.array([nxm_supply_prediction[-1] - nxm_supply_prediction[0]])
     
     # MAIN TIME LOOP
-    for i in range(hours):
+    for i in range(quarter_days):
 
         # MOVE TIME
         print(f'time = {times[-1]}')
-        networks.provider.set_timestamp(block.timestamp + 3_600)
+        networks.provider.set_timestamp(block.timestamp + 21_600)
         networks.provider.mine()
         block = networks.provider.get_block('latest')
-
-        # SWAP ETH EVERY TIME
         
         # print metrics
         print(f'before swap pool = {cap_pool_prediction[-1]}')
@@ -121,13 +120,14 @@ def main():
         print(f'before swap spot_a = {spot_price_a_prediction[-1]}')
         print(f'before swap NXM_b = {liq_NXM_b_prediction[-1]}')
         print(f'before swap NXM_a = {liq_NXM_a_prediction[-1]}')
+        print(f'before swap budget = {budget_prediction[-1]}')
         print(f'before swap ip = {ip_prediction[-1]}')
-        print(f'nxm minted = {nxm_minted_prediction[-1]}')
         
-        # assume swapping only happens if NXM price is above a certain percentage of BV
-        if i > 192: 
-                ramm.swap(0, 0, 32503680000,
-                          value=int(eth_in * 1e18), sender=dev)
+        # SWAPPING
+        # Swap after 2 days
+        if i == 8:
+            ramm.swap(int(nxm_out*1e18), 0, 32503680000, sender=dev)
+                    
         
         # RECORD METRICS & TIME
 
@@ -143,8 +143,8 @@ def main():
         spot_price_a_prediction = np.append(spot_price_a_prediction, [ramm.getSpotPrices()[0]/1e18])
         liq_NXM_b_prediction = np.append(liq_NXM_b_prediction, [ramm.getReserves()[2]/1e18])
         liq_NXM_a_prediction = np.append(liq_NXM_a_prediction, [ramm.getReserves()[1]/1e18])
+        budget_prediction = np.append(budget_prediction, [ramm.getReserves()[3]/1e18])
         ip_prediction = np.append(ip_prediction, [ramm.getInternalPrice()/1e18])
-        nxm_minted_prediction = np.append(nxm_minted_prediction, [nxm_supply_prediction[-1] - nxm_supply_prediction[0]])
         
         print(f'after swap pool = {cap_pool_prediction[-1]}')
         print(f'after swap supply = {nxm_supply_prediction[-1]}')
@@ -154,20 +154,21 @@ def main():
         print(f'after swap spot_a = {spot_price_a_prediction[-1]}')
         print(f'after swap NXM_b = {liq_NXM_b_prediction[-1]}')
         print(f'after swap NXM_a = {liq_NXM_a_prediction[-1]}')
+        print(f'after swap budget = {budget_prediction[-1]}')
         print(f'after swap ip = {ip_prediction[-1]}')
-        print(f'after swap nxm minted = {nxm_minted_prediction[-1]}')
-  
+          
     #-----GRAPHS-----#
     # Destructuring initialization
     fig, axs = plt.subplots(3, 2, figsize=(15,18))
     fig.suptitle(f'''Deterministic Protocol-only Model, Solidity Contracts
-                 Opening and target liq of {liq_prediction[0]} ETH
-                 Ratchet speed = {ratchet_speed}% of BV/day. Max daily liquidity withdrawal of {liq_withdrawal} ETH.
-                 Testing {eth_in_daily} ETH entering/day after Day 8
+                 Opening and target liq of {liq_prediction[0]} ETH; Budget of {budget_prediction[0]} ETH
+                 Ratchet speed while budget lasts = {fast_ratchet_speed}% of BV/day; {ratchet_speed}% of BV/day after
+                 Max daily liquidity injection of {fast_liq_injection} ETH while budget lasts and {liq_injection} ETH after 
+                 Testing {nxm_out} NXM sale after 2 days
                  ''',
                  fontsize=16)
     # fig.tight_layout()
-    fig.subplots_adjust(top=0.9)
+    fig.subplots_adjust(top=0.88)
 
     # Subplot
     axs[0, 0].plot(times, spot_price_b_prediction, label='price below')
@@ -194,8 +195,9 @@ def main():
     axs[2, 0].set_title('liquidity_eth')
     axs[2, 0].legend()
     # Subplot
-    axs[2, 1].plot(times, nxm_minted_prediction, label='nxm_minted')
-    axs[2, 1].set_title('nxm_minted')
+    axs[2, 1].plot(times, cap_pool_change_prediction, label='capital_loss')
+    axs[2, 1].plot(times, budget_prediction, label='budget')
+    axs[2, 1].set_title('capital_loss')
     axs[2, 1].legend()
 
     fig.savefig('graphs/graph.png')
@@ -204,7 +206,7 @@ def main():
     src_dir = os.getcwd() # get the current working dir
 
     # copy graph
-    graph_dest_dir = src_dir + "/graphs/implementation_minting"
+    graph_dest_dir = src_dir + "/graphs/implementation_below_value_tests"
     graph_src_file = os.path.join(src_dir, "graphs", "graph.png")
     # copy the file to destination dir
     shutil.copy(graph_src_file , graph_dest_dir)
@@ -219,7 +221,7 @@ def main():
     print(f'graph copied to {new_graph_file_name}')
 
     # copy script
-    script_dest_dir = src_dir + "/script_archive/Implementation_Minting"
+    script_dest_dir = src_dir + "/script_archive/Implementation_BelowValueTests"
     script_src_file = os.path.join(src_dir, "scripts", "sim.py")
     # copy the file to destination dir
     shutil.copy(script_src_file , script_dest_dir)
